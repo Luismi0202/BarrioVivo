@@ -1,0 +1,13 @@
+[
+  {
+    "id": "admin1",
+    "email": "admin@barriovivo.com",
+    "userId": "admin_user_1"
+  },
+  {
+    "id": "admin2",
+    "email": "moderator@barriovivo.com",
+    "userId": "admin_user_2"
+  }
+]
+

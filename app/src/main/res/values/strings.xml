@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">BarrioVivo</string>
+
+    <!-- Authentication -->
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="register_title">Registro</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="confirm_password_hint">Confirmar Contraseña</string>
+    <string name="location_hint">Ubicación</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Registrarse</string>
+
+    <!-- Home -->
+    <string name="nearby_meals">Cerca de ti</string>
+    <string name="my_meals">Mis Comidas</string>
+    <string name="create_meal">Crear Comida</string>
+    <string name="no_nearby_meals">No hay comidas cercanas disponibles</string>
+    <string name="no_my_meals">No has publicado comidas aún</string>
+
+    <!-- Create Meal -->
+    <string name="meal_title">Nombre de la comida</string>
+    <string name="meal_description">Descripción</string>
+    <string name="expiry_date">Fecha de caducidad</string>
+    <string name="expiry_date_warning">La fecha de caducidad es OBLIGATORIA</string>
+    <string name="publish_button">Publicar Comida</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notificaciones</string>
+    <string name="no_notifications">No tienes notificaciones</string>
+    <string name="post_approved">¡Tu comida fue aprobada!</string>
+    <string name="post_rejected">Tu comida fue rechazada</string>
+
+    <!-- Admin -->
+    <string name="admin_dashboard">Panel de Moderación</string>
+    <string name="no_pending_posts">No hay publicaciones pendientes</string>
+    <string name="approve_button">Aprobar</string>
+    <string name="reject_button">Rechazar</string>
+
+    <!-- Errors -->
+    <string name="error_empty_email">El email no puede estar vacío</string>
+    <string name="error_invalid_email">Email inválido</string>
+    <string name="error_short_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_passwords_mismatch">Las contraseñas no coinciden</string>
+    <string name="error_empty_title">El nombre de la comida no puede estar vacío</string>
+    <string name="error_no_photo">Es obligatorio añadir una foto</string>
+    <string name="error_invalid_date">La fecha de caducidad no puede ser anterior a hoy</string>
+    <string name="error_user_exists">El email ya está registrado</string>
+    <string name="error_invalid_credentials">Credenciales inválidas</string>
+</resources>
