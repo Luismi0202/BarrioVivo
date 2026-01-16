@@ -35,11 +35,14 @@ data class MealPostEntity(
     val longitude: Double,
     val city: String,
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val status: String = MealPostStatus.PENDING.name,
+    val status: String = MealPostStatus.ACTIVE.name, // Ahora ACTIVE por defecto
     val adminComment: String = "",
     val isAvailable: Boolean = true,
     val claimedByUserId: String? = null,
-    val claimedAt: LocalDateTime? = null
+    val claimedAt: LocalDateTime? = null,
+    val reportCount: Int = 0,
+    val reportedByUsers: String = "", // IDs separados por comas
+    val lastReportReason: String = ""
 )
 
 @Entity(tableName = "notifications")

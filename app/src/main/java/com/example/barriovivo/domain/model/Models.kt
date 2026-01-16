@@ -34,15 +34,20 @@ data class MealPost(
     val expiryDate: LocalDate = LocalDate.now(),
     val location: Location = Location(),
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    val status: MealPostStatus = MealPostStatus.PENDING,
+    val status: MealPostStatus = MealPostStatus.ACTIVE, // Ahora por defecto ACTIVE
     val adminComment: String = "",
     val isAvailable: Boolean = true, // Si está disponible para reclamar
     val claimedByUserId: String? = null, // Usuario que la reclamó
-    val claimedAt: LocalDateTime? = null // Fecha de reclamación
+    val claimedAt: LocalDateTime? = null, // Fecha de reclamación
+    val reportCount: Int = 0, // Número de reportes
+    val reportedByUsers: List<String> = emptyList(), // IDs de usuarios que reportaron
+    val lastReportReason: String = "" // Último motivo de reporte
 )
 
 enum class MealPostStatus {
-    PENDING, APPROVED, REJECTED
+    ACTIVE, // Publicado y visible (antes era APPROVED)
+    REPORTED, // Ha sido reportado y está pendiente de revisión
+    DELETED // Borrado por admin
 }
 
 data class Notification(
@@ -57,11 +62,12 @@ data class Notification(
 )
 
 enum class NotificationType {
-    POST_APPROVED, POST_REJECTED, NEW_NEARBY_POST, INFO,
+    INFO,
     FOOD_CLAIMED, // Cuando alguien reclama tu comida
     NEW_MESSAGE, // Cuando recibes un mensaje
     CHAT_CLOSED, // Cuando se cierra un chat
-    POST_DELETED_BY_ADMIN // Cuando un admin borra tu post
+    POST_DELETED_BY_ADMIN, // Cuando un admin borra tu post
+    POST_REPORTED // Notificación para admin cuando reportan un post
 }
 
 data class Admin(

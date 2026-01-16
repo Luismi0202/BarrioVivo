@@ -19,7 +19,7 @@ import com.example.barriovivo.data.database.entity.*
         ChatConversationEntity::class,
         ChatMessageEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class)
@@ -76,6 +76,18 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Agregar campos de reporte a meal_posts
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN reportCount INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN reportedByUsers TEXT NOT NULL DEFAULT ''")
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN lastReportReason TEXT NOT NULL DEFAULT ''")
+
+                // Actualizar posts PENDING y APPROVED a ACTIVE
+                database.execSQL("UPDATE meal_posts SET status = 'ACTIVE' WHERE status = 'PENDING' OR status = 'APPROVED'")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -83,7 +95,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "barriovivo_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .fallbackToDestructiveMigration() // Solo para desarrollo
                     .build()
                 INSTANCE = instance

@@ -7,17 +7,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,32 +24,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.barriovivo.domain.model.MealPost
-import com.example.barriovivo.ui.component.ErrorMessage
-import com.example.barriovivo.ui.component.LoadingScreen
-import com.example.barriovivo.ui.theme.ErrorRed
-import com.example.barriovivo.ui.theme.GreenPrimary
-import com.example.barriovivo.ui.theme.GreenDark
-import com.example.barriovivo.ui.theme.OrangePrimary
-import com.example.barriovivo.ui.theme.TextDark
-import com.example.barriovivo.ui.theme.TextGray
+import com.example.barriovivo.ui.theme.*
+import com.example.barriovivo.ui.viewmodel.AdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(
-    pendingPosts: List<MealPost> = emptyList(),
-    isLoading: Boolean = false,
-    error: String? = null,
-    successMessage: String? = null,
-    onBack: () -> Unit = {},
+    viewModel: AdminViewModel = hiltViewModel(),
+    onLogout: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onApprove: (postId: String) -> Unit = {},
-    onReject: (postId: String, reason: String) -> Unit = { _, _ -> },
-    onErrorDismiss: () -> Unit = {},
-    onSuccessDismiss: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSuccess()
+        }
+    }
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -69,6 +70,15 @@ fun AdminDashboardScreen(
                     containerColor = GreenDark
                 ),
                 actions = {
+                    // Notificaciones
+                    IconButton(onClick = onNotificationsClick) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Notificaciones",
+                            tint = Color.White
+                        )
+                    }
+                    // Perfil
                     IconButton(onClick = onProfileClick) {
                         Icon(
                             Icons.Default.Person,
@@ -76,7 +86,8 @@ fun AdminDashboardScreen(
                             tint = Color.White
                         )
                     }
-                    IconButton(onClick = onBack) {
+                    // Cerrar sesión
+                    IconButton(onClick = onLogout) {
                         Icon(
                             Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Cerrar sesión",
@@ -93,73 +104,6 @@ fun AdminDashboardScreen(
                 .padding(paddingValues)
                 .background(Color(0xFFF5F5F5))
         ) {
-            // Error message
-            if (!error.isNullOrEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = error,
-                            color = ErrorRed,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = onErrorDismiss, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = ErrorRed)
-                        }
-                    }
-                }
-            }
-
-            // Success message
-            if (!successMessage.isNullOrEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary.copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = GreenPrimary
-                            )
-                            Text(
-                                text = successMessage,
-                                color = GreenDark,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        IconButton(onClick = onSuccessDismiss, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = GreenPrimary)
-                        }
-                    }
-                }
-            }
-
             // Stats card
             Card(
                 modifier = Modifier
@@ -177,13 +121,17 @@ fun AdminDashboardScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "${pendingPosts.size}",
+                            text = "⚠️",
+                            fontSize = 32.sp
+                        )
+                        Text(
+                            text = "${uiState.reportedPosts.size}",
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             color = OrangePrimary
                         )
                         Text(
-                            text = "Pendientes",
+                            text = "Reportados",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
@@ -191,14 +139,23 @@ fun AdminDashboardScreen(
                 }
             }
 
-            if (isLoading) {
+            // Título sección
+            Text(
+                text = "Posts Reportados",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = TextDark,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = GreenPrimary)
                 }
-            } else if (pendingPosts.isEmpty()) {
+            } else if (uiState.reportedPosts.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -207,12 +164,12 @@ fun AdminDashboardScreen(
                         Text("✅", fontSize = 64.sp)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No hay publicaciones pendientes",
+                            text = "No hay reportes pendientes",
                             style = MaterialTheme.typography.titleMedium,
                             color = TextGray
                         )
                         Text(
-                            text = "Todo está bajo control",
+                            text = "¡Todo está bajo control!",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextGray.copy(alpha = 0.7f)
                         )
@@ -223,11 +180,11 @@ fun AdminDashboardScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(pendingPosts) { post ->
-                        AdminMealPostCard(
+                    items(uiState.reportedPosts) { post ->
+                        ReportedPostCard(
                             mealPost = post,
-                            onApprove = { onApprove(post.id) },
-                            onReject = { reason -> onReject(post.id, reason) }
+                            onApprove = { viewModel.approveReportedPost(post.id) },
+                            onDelete = { reason -> viewModel.deletePost(post.id, reason) }
                         )
                     }
                 }
@@ -238,14 +195,13 @@ fun AdminDashboardScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AdminMealPostCard(
+fun ReportedPostCard(
     mealPost: MealPost,
-    onApprove: () -> Unit = {},
-    onReject: (String) -> Unit = {}
+    onApprove: () -> Unit,
+    onDelete: (String) -> Unit
 ) {
-    var showRejectDialog by remember { mutableStateOf(false) }
-    var rejectReason by remember { mutableStateOf("") }
-    var showImageViewer by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deleteReason by remember { mutableStateOf("") }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -254,6 +210,32 @@ fun AdminMealPostCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            // Badge de reporte
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(ErrorRed.copy(alpha = 0.1f))
+                    .padding(12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = ErrorRed,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = "Reportado ${mealPost.reportCount} ${if (mealPost.reportCount == 1) "vez" else "veces"}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = ErrorRed,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             // Carrusel de imágenes
             if (mealPost.photoUris.isNotEmpty()) {
                 val pagerState = rememberPagerState(pageCount = { mealPost.photoUris.size })
@@ -270,9 +252,7 @@ fun AdminMealPostCard(
                         AsyncImage(
                             model = mealPost.photoUris[page],
                             contentDescription = "Foto ${page + 1}",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                            modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -308,45 +288,11 @@ fun AdminMealPostCard(
                             }
                         }
                     }
-
-                    // Badge de fotos
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black.copy(alpha = 0.6f)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "📷 ${mealPost.photoUris.size}",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White
-                        )
-                    }
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(GreenPrimary.copy(alpha = 0.2f), GreenDark.copy(alpha = 0.3f))
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Sin fotos", color = TextGray)
                 }
             }
 
             // Contenido
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = mealPost.title,
                     style = MaterialTheme.typography.titleLarge,
@@ -398,21 +344,29 @@ fun AdminMealPostCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = ErrorRed.copy(alpha = 0.1f)
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "⏱️ Caduca: ${mealPost.expiryDate}",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = ErrorRed,
-                        fontWeight = FontWeight.Medium
-                    )
+                // Motivo del reporte
+                if (mealPost.lastReportReason.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = ErrorRed.copy(alpha = 0.05f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "📝 Último motivo de reporte:",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = mealPost.lastReportReason,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextDark
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -422,6 +376,7 @@ fun AdminMealPostCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Aprobar (mantener visible)
                     Button(
                         onClick = onApprove,
                         modifier = Modifier.weight(1f),
@@ -429,16 +384,17 @@ fun AdminMealPostCard(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(
-                            Icons.Default.CheckCircle,
+                            Icons.Default.Check,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Aprobar")
+                        Text("Mantener")
                     }
 
+                    // Borrar
                     Button(
-                        onClick = { showRejectDialog = true },
+                        onClick = { showDeleteDialog = true },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = ErrorRed),
                         shape = RoundedCornerShape(12.dp)
@@ -449,38 +405,38 @@ fun AdminMealPostCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Rechazar")
+                        Text("Borrar")
                     }
                 }
             }
         }
     }
 
-    // Diálogo para rechazar
-    if (showRejectDialog) {
+    // Diálogo para borrar
+    if (showDeleteDialog) {
         AlertDialog(
-            onDismissRequest = { showRejectDialog = false },
+            onDismissRequest = { showDeleteDialog = false },
             title = {
                 Text(
-                    "Rechazar publicación",
+                    "🗑️ Borrar publicación",
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Column {
                     Text(
-                        "¿Por qué rechazas esta publicación?",
+                        "¿Por qué borras esta publicación?",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = rejectReason,
-                        onValueChange = { rejectReason = it },
-                        label = { Text("Motivo del rechazo") },
+                        value = deleteReason,
+                        onValueChange = { deleteReason = it },
+                        label = { Text("Motivo (se enviará al usuario)") },
                         modifier = Modifier.fillMaxWidth(),
-                        minLines = 3,
-                        maxLines = 5,
+                        minLines = 2,
+                        maxLines = 4,
                         shape = RoundedCornerShape(12.dp)
                     )
                 }
@@ -488,27 +444,46 @@ fun AdminMealPostCard(
             confirmButton = {
                 Button(
                     onClick = {
-                        if (rejectReason.isNotBlank()) {
-                            onReject(rejectReason)
-                            showRejectDialog = false
-                            rejectReason = ""
-                        }
+                        onDelete(deleteReason)
+                        showDeleteDialog = false
+                        deleteReason = ""
                     },
-                    enabled = rejectReason.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
                 ) {
-                    Text("Rechazar")
+                    Text("Borrar")
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    showRejectDialog = false
-                    rejectReason = ""
+                    showDeleteDialog = false
+                    deleteReason = ""
                 }) {
                     Text("Cancelar")
                 }
             }
         )
     }
+}
+
+// Mantener compatibilidad con MainActivity existente
+@Composable
+fun AdminDashboardScreen(
+    pendingPosts: List<MealPost> = emptyList(),
+    isLoading: Boolean = false,
+    error: String? = null,
+    successMessage: String? = null,
+    onBack: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    onApprove: (postId: String) -> Unit = {},
+    onReject: (postId: String, reason: String) -> Unit = { _, _ -> },
+    onErrorDismiss: () -> Unit = {},
+    onSuccessDismiss: () -> Unit = {}
+) {
+    // Usar el nuevo componente con ViewModel
+    AdminDashboardScreen(
+        onLogout = onBack,
+        onProfileClick = onProfileClick,
+        onNotificationsClick = {}
+    )
 }
 

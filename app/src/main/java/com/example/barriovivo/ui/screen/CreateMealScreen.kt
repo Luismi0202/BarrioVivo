@@ -526,6 +526,18 @@ fun CreateMealScreen(
                                 localError = null
                                 viewModel.clearError()
 
+                                // Usar la ubicación del usuario, o valores por defecto si no tiene
+                                val userLocation = if (currentUser.location.city.isNotBlank()) {
+                                    currentUser.location
+                                } else {
+                                    com.example.barriovivo.domain.model.Location(
+                                        city = "Madrid",
+                                        latitude = 40.4168,
+                                        longitude = -3.7038,
+                                        zipCode = ""
+                                    )
+                                }
+
                                 viewModel.createMealPost(
                                     userId = currentUser.id,
                                     userName = currentUser.email,
@@ -533,7 +545,7 @@ fun CreateMealScreen(
                                     description = description,
                                     photoUris = photoUris.map { it.toString() },
                                     expiryDate = expiryDate!!,
-                                    location = currentUser.location
+                                    location = userLocation
                                 )
                             },
                             modifier = Modifier.weight(1f),
@@ -562,19 +574,19 @@ fun CreateMealScreen(
     // Observar el éxito de la publicación
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
-            scope.launch {
-                snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
-            }
-            kotlinx.coroutines.delay(800)
-            viewModel.clearError()
+            snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
+            // Esperar un poco para que el usuario vea el mensaje
+            kotlinx.coroutines.delay(500)
+            // Resetear estado y cerrar
+            viewModel.resetState()
             onClose()
         }
     }
 
-    // Observar errores
+    // Observar errores del ViewModel
     LaunchedEffect(uiState.error) {
-        if (uiState.error != null) {
-            localError = uiState.error
+        uiState.error?.let { error ->
+            localError = error
         }
     }
 

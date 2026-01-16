@@ -42,14 +42,32 @@ interface MealPostDao {
     @Query("SELECT * FROM meal_posts WHERE userId = :userId ORDER BY createdAt DESC")
     fun getUserMealPosts(userId: String): Flow<List<MealPostEntity>>
 
-    @Query("SELECT * FROM meal_posts WHERE status = 'APPROVED' AND expiryDate >= :todayDate AND isAvailable = 1 ORDER BY createdAt DESC")
-    fun getApprovedMealPosts(todayDate: LocalDate): Flow<List<MealPostEntity>>
+    // Ahora busca posts ACTIVE (no necesitan aprobación)
+    @Query("SELECT * FROM meal_posts WHERE status = 'ACTIVE' AND expiryDate >= :todayDate AND isAvailable = 1 ORDER BY createdAt DESC")
+    fun getActiveMealPosts(todayDate: LocalDate): Flow<List<MealPostEntity>>
 
-    @Query("SELECT * FROM meal_posts WHERE status = 'PENDING' ORDER BY createdAt DESC")
-    fun getPendingMealPosts(): Flow<List<MealPostEntity>>
+    // Posts reportados para el admin
+    @Query("SELECT * FROM meal_posts WHERE status = 'REPORTED' ORDER BY reportCount DESC, createdAt DESC")
+    fun getReportedMealPosts(): Flow<List<MealPostEntity>>
+
+    // Todos los posts activos para el admin (puede ver todo)
+    @Query("SELECT * FROM meal_posts WHERE status != 'DELETED' ORDER BY createdAt DESC")
+    fun getAllActivePosts(): Flow<List<MealPostEntity>>
 
     @Query("UPDATE meal_posts SET isAvailable = 0, claimedByUserId = :userId, claimedAt = :claimedAt WHERE id = :postId")
     suspend fun claimMealPost(postId: String, userId: String, claimedAt: java.time.LocalDateTime)
+
+    // Reportar un post
+    @Query("UPDATE meal_posts SET reportCount = reportCount + 1, status = 'REPORTED', reportedByUsers = :reportedByUsers, lastReportReason = :reason WHERE id = :postId")
+    suspend fun reportMealPost(postId: String, reportedByUsers: String, reason: String)
+
+    // Aprobar post reportado (mantenerlo activo)
+    @Query("UPDATE meal_posts SET status = 'ACTIVE', reportCount = 0, reportedByUsers = '', lastReportReason = '' WHERE id = :postId")
+    suspend fun approveReportedPost(postId: String)
+
+    // Marcar como borrado
+    @Query("UPDATE meal_posts SET status = 'DELETED', adminComment = :reason WHERE id = :postId")
+    suspend fun markAsDeleted(postId: String, reason: String)
 
     @Update
     suspend fun updateMealPost(mealPost: MealPostEntity)

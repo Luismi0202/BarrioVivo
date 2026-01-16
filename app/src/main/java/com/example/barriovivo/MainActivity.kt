@@ -166,6 +166,8 @@ class MainActivity : ComponentActivity() {
                                 claimSuccess = mealDetailState.claimSuccess,
                                 error = mealDetailState.error,
                                 currentUserId = authState.currentUser?.id ?: "",
+                                isReportLoading = mealDetailState.isReportLoading,
+                                reportSuccess = mealDetailState.reportSuccess,
                                 onBack = { navController.popBackStack() },
                                 onClaimClick = {
                                     authState.currentUser?.let { user ->
@@ -174,6 +176,12 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onGoToChat = { conversationId ->
                                     navController.navigate("chat_conversation/$conversationId")
+                                },
+                                onReportClick = { reason ->
+                                    authState.currentUser?.let { user ->
+                                        // El admin ID se obtiene del config - por ahora usar uno hardcodeado
+                                        mealDetailViewModel.reportMealPost(mealId, user.id, reason, "admin")
+                                    }
                                 }
                             )
                         }
@@ -215,14 +223,8 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("admin_dashboard") {
-                            val adminViewModel: com.example.barriovivo.ui.viewmodel.AdminViewModel = hiltViewModel()
-                            val adminState by adminViewModel.uiState.collectAsState()
-
                             com.example.barriovivo.ui.screen.AdminDashboardScreen(
-                                pendingPosts = adminState.mealPosts,
-                                isLoading = adminState.isLoading,
-                                error = adminState.error,
-                                onBack = {
+                                onLogout = {
                                     authViewModel.logout()
                                     navController.navigate("auth") {
                                         popUpTo("admin_dashboard") { inclusive = true }
@@ -230,20 +232,13 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onProfileClick = { navController.navigate("admin_profile") },
-                                onApprove = { postId ->
-                                    adminViewModel.approveMealPost(postId)
-                                },
-                                onReject = { postId, reason ->
-                                    adminViewModel.deleteMealPost(postId, reason)
-                                },
-                                onErrorDismiss = { adminViewModel.clearError() },
-                                onSuccessDismiss = { adminViewModel.clearSuccess() }
+                                onNotificationsClick = { navController.navigate("admin_notifications") }
                             )
+                        }
 
-                            // Cargar todos los posts para revisión
-                            LaunchedEffect(Unit) {
-                                adminViewModel.loadAllMealPosts()
-                            }
+                        // Admin Notifications
+                        composable("admin_notifications") {
+                            NotificationScreen(onBack = { navController.popBackStack() })
                         }
 
                         // Admin Profile Screen

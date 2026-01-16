@@ -96,8 +96,11 @@ class CreateMealViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(
             error = null,
-            expiryDateError = null,
-            success = false
+            expiryDateError = null
         )
+    }
+
+    fun resetState() {
+        _uiState.value = CreateMealUiState()
     }
 }

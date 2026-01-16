@@ -20,7 +20,9 @@ data class MealDetailUiState(
     val isClaimLoading: Boolean = false,
     val claimSuccess: Boolean = false,
     val conversationId: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val isReportLoading: Boolean = false,
+    val reportSuccess: Boolean = false
 )
 
 @HiltViewModel
@@ -134,6 +136,70 @@ class MealDetailViewModel @Inject constructor(
 
     fun clearClaimSuccess() {
         _uiState.value = _uiState.value.copy(claimSuccess = false, conversationId = null)
+    }
+
+    fun clearReportSuccess() {
+        _uiState.value = _uiState.value.copy(reportSuccess = false)
+    }
+
+    // Reportar un post
+    fun reportMealPost(postId: String, reporterId: String, reason: String, adminUserId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isReportLoading = true)
+
+            val mealPost = _uiState.value.mealPost
+            if (mealPost == null) {
+                _uiState.value = _uiState.value.copy(
+                    isReportLoading = false,
+                    error = "No se encontró la comida"
+                )
+                return@launch
+            }
+
+            // Verificar que no sea el propio usuario
+            if (mealPost.userId == reporterId) {
+                _uiState.value = _uiState.value.copy(
+                    isReportLoading = false,
+                    error = "No puedes reportar tu propia publicación"
+                )
+                return@launch
+            }
+
+            // Verificar si ya reportó
+            if (mealPost.reportedByUsers.contains(reporterId)) {
+                _uiState.value = _uiState.value.copy(
+                    isReportLoading = false,
+                    error = "Ya has reportado esta publicación"
+                )
+                return@launch
+            }
+
+            val result = mealPostRepository.reportMealPost(postId, reporterId, reason)
+
+            result.onSuccess {
+                // Notificar al admin
+                notificationRepository.createNotification(
+                    userId = adminUserId,
+                    title = "⚠️ Nueva publicación reportada",
+                    message = "La comida '${mealPost.title}' ha sido reportada. Motivo: $reason",
+                    type = NotificationType.POST_REPORTED,
+                    relatedPostId = postId
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    isReportLoading = false,
+                    reportSuccess = true,
+                    error = null
+                )
+            }
+
+            result.onFailure { exception ->
+                _uiState.value = _uiState.value.copy(
+                    isReportLoading = false,
+                    error = exception.message ?: "Error al reportar"
+                )
+            }
+        }
     }
 }
 

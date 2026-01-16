@@ -21,9 +21,10 @@ class MealPostRepository @Inject constructor(
 ) {
     companion object {
         private const val EARTH_RADIUS_KM = 6371.0
-        private const val DEFAULT_RADIUS_KM = 5.0 // Radio por defecto de 5km
+        private const val DEFAULT_RADIUS_KM = 10.0 // Radio por defecto de 10km
     }
 
+    // Crear post - ahora se publica directamente como ACTIVE
     suspend fun createMealPost(
         userId: String,
         userName: String,
@@ -40,13 +41,13 @@ class MealPostRepository @Inject constructor(
             userName = userName,
             title = title,
             description = description,
-            photoUris = photoUris.joinToString(","), // Guardar como string separado por comas
+            photoUris = photoUris.joinToString(","),
             expiryDate = expiryDate,
             latitude = location.latitude,
             longitude = location.longitude,
             city = location.city,
             createdAt = LocalDateTime.now(),
-            status = MealPostStatus.PENDING.name
+            status = MealPostStatus.ACTIVE.name // Publicación directa!
         )
         mealPostDao.insertMealPost(mealPostEntity)
         Result.success(mealPostEntity.toDomain())
@@ -54,13 +55,14 @@ class MealPostRepository @Inject constructor(
         Result.failure(e)
     }
 
-    fun getNearbyApprovedMealPosts(
+    // Obtener posts activos cercanos (ahora usa ACTIVE en vez de APPROVED)
+    fun getNearbyActiveMealPosts(
         userLatitude: Double,
         userLongitude: Double,
         radiusKm: Double = DEFAULT_RADIUS_KM
     ): Flow<List<MealPost>> {
         val todayDate = LocalDate.now()
-        return mealPostDao.getApprovedMealPosts(todayDate).map { posts ->
+        return mealPostDao.getActiveMealPosts(todayDate).map { posts ->
             posts.filter { post ->
                 val distance = calculateDistance(
                     userLatitude, userLongitude,
@@ -77,20 +79,30 @@ class MealPostRepository @Inject constructor(
         }
     }
 
-    fun getPendingMealPosts(): Flow<List<MealPost>> {
-        return mealPostDao.getPendingMealPosts().map { posts ->
+    // Posts reportados para el admin
+    fun getReportedMealPosts(): Flow<List<MealPost>> {
+        return mealPostDao.getReportedMealPosts().map { posts ->
             posts.map { it.toDomain() }
         }
     }
 
-    suspend fun approveMealPost(postId: String, adminComment: String = ""): Result<Unit> = try {
+    // Todos los posts para el admin
+    fun getAllActivePosts(): Flow<List<MealPost>> {
+        return mealPostDao.getAllActivePosts().map { posts ->
+            posts.map { it.toDomain() }
+        }
+    }
+
+    // Reportar un post
+    suspend fun reportMealPost(postId: String, reporterId: String, reason: String): Result<Unit> = try {
         val post = mealPostDao.getMealPostById(postId)
         if (post != null) {
-            val updatedPost = post.copy(
-                status = MealPostStatus.APPROVED.name,
-                adminComment = adminComment
-            )
-            mealPostDao.updateMealPost(updatedPost)
+            val currentReporters = if (post.reportedByUsers.isBlank()) {
+                reporterId
+            } else {
+                "${post.reportedByUsers},$reporterId"
+            }
+            mealPostDao.reportMealPost(postId, currentReporters, reason)
             Result.success(Unit)
         } else {
             Result.failure(Exception("Post no encontrado"))
@@ -99,25 +111,25 @@ class MealPostRepository @Inject constructor(
         Result.failure(e)
     }
 
-    suspend fun rejectMealPost(postId: String, adminComment: String): Result<Unit> = try {
-        val post = mealPostDao.getMealPostById(postId)
-        if (post != null) {
-            val updatedPost = post.copy(
-                status = MealPostStatus.REJECTED.name,
-                adminComment = adminComment
-            )
-            mealPostDao.updateMealPost(updatedPost)
-            Result.success(Unit)
-        } else {
-            Result.failure(Exception("Post no encontrado"))
-        }
+    // Aprobar post reportado (el admin decide mantenerlo)
+    suspend fun approveReportedPost(postId: String): Result<Unit> = try {
+        mealPostDao.approveReportedPost(postId)
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    // Borrar post (admin)
+    suspend fun deletePostByAdmin(postId: String, reason: String): Result<Unit> = try {
+        mealPostDao.markAsDeleted(postId, reason)
+        Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
     suspend fun claimMealPost(postId: String, userId: String): Result<Unit> = try {
         val post = mealPostDao.getMealPostById(postId)
-        if (post != null && post.isAvailable) {
+        if (post != null && post.isAvailable && post.status == MealPostStatus.ACTIVE.name) {
             mealPostDao.claimMealPost(postId, userId, LocalDateTime.now())
             Result.success(Unit)
         } else {
@@ -169,7 +181,7 @@ class MealPostRepository @Inject constructor(
             userName = userName,
             title = title,
             description = description,
-            photoUris = photoUris.split(",").filter { it.isNotBlank() }, // Convertir de string a lista
+            photoUris = photoUris.split(",").filter { it.isNotBlank() },
             expiryDate = expiryDate,
             location = Location(
                 city = city,
@@ -177,11 +189,14 @@ class MealPostRepository @Inject constructor(
                 longitude = longitude
             ),
             createdAt = createdAt,
-            status = MealPostStatus.valueOf(status),
+            status = try { MealPostStatus.valueOf(status) } catch (e: Exception) { MealPostStatus.ACTIVE },
             adminComment = adminComment,
             isAvailable = isAvailable,
             claimedByUserId = claimedByUserId,
-            claimedAt = claimedAt
+            claimedAt = claimedAt,
+            reportCount = reportCount,
+            reportedByUsers = reportedByUsers.split(",").filter { it.isNotBlank() },
+            lastReportReason = lastReportReason
         )
     }
 }

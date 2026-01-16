@@ -30,7 +30,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                mealPostRepository.getNearbyApprovedMealPosts(
+                mealPostRepository.getNearbyActiveMealPosts(
                     userLatitude = userLatitude,
                     userLongitude = userLongitude
                 ).collect { posts ->

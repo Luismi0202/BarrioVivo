@@ -12,10 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,15 +43,27 @@ fun MealDetailScreen(
     claimSuccess: Boolean = false,
     error: String? = null,
     currentUserId: String = "",
+    isReportLoading: Boolean = false,
+    reportSuccess: Boolean = false,
     onBack: () -> Unit = {},
     onClaimClick: () -> Unit = {},
-    onGoToChat: (String) -> Unit = {}
+    onGoToChat: (String) -> Unit = {},
+    onReportClick: (reason: String) -> Unit = {}
 ) {
     var showClaimSuccessDialog by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
+    var showReportSuccessDialog by remember { mutableStateOf(false) }
+    var reportReason by remember { mutableStateOf("") }
 
     LaunchedEffect(claimSuccess) {
         if (claimSuccess) {
             showClaimSuccessDialog = true
+        }
+    }
+
+    LaunchedEffect(reportSuccess) {
+        if (reportSuccess) {
+            showReportSuccessDialog = true
         }
     }
 
@@ -69,6 +78,18 @@ fun MealDetailScreen(
                             contentDescription = "Atrás",
                             tint = Color.White
                         )
+                    }
+                },
+                actions = {
+                    // Botón de reportar (solo si no es el propio usuario)
+                    if (mealPost != null && mealPost.userId != currentUserId) {
+                        IconButton(onClick = { showReportDialog = true }) {
+                            Icon(
+                                Icons.Default.Flag,
+                                contentDescription = "Reportar",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -513,6 +534,109 @@ fun MealDetailScreen(
                     onBack()
                 }) {
                     Text("Volver")
+                }
+            }
+        )
+    }
+
+    // Diálogo para reportar
+    if (showReportDialog) {
+        AlertDialog(
+            onDismissRequest = { showReportDialog = false },
+            icon = {
+                Icon(
+                    Icons.Default.Flag,
+                    contentDescription = null,
+                    tint = OrangePrimary,
+                    modifier = Modifier.size(48.dp)
+                )
+            },
+            title = {
+                Text(
+                    "Reportar publicación",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        "¿Por qué quieres reportar esta publicación?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextGray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = reportReason,
+                        onValueChange = { reportReason = it },
+                        label = { Text("Motivo del reporte") },
+                        placeholder = { Text("Ej: Comida en mal estado, información falsa...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 5,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (reportReason.isNotBlank()) {
+                            onReportClick(reportReason)
+                            showReportDialog = false
+                            reportReason = ""
+                        }
+                    },
+                    enabled = reportReason.isNotBlank() && !isReportLoading,
+                    colors = ButtonDefaults.buttonColors(containerColor = OrangePrimary)
+                ) {
+                    if (isReportLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Enviar reporte")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showReportDialog = false
+                    reportReason = ""
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Diálogo de éxito al reportar
+    if (showReportSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showReportSuccessDialog = false },
+            icon = {
+                Text("✅", fontSize = 48.sp)
+            },
+            title = {
+                Text(
+                    "Reporte enviado",
+                    fontWeight = FontWeight.Bold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            },
+            text = {
+                Text(
+                    "Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.",
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showReportSuccessDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                ) {
+                    Text("Entendido")
                 }
             }
         )

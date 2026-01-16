@@ -14,10 +14,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AdminUiState(
-    val mealPosts: List<MealPost> = emptyList(),
+    val reportedPosts: List<MealPost> = emptyList(),
+    val allPosts: List<MealPost> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    val selectedTab: Int = 0 // 0 = Reportados, 1 = Todos
 )
 
 @HiltViewModel
@@ -29,14 +31,39 @@ class AdminViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AdminUiState())
     val uiState: StateFlow<AdminUiState> = _uiState.asStateFlow()
 
-    fun loadAllMealPosts() {
+    init {
+        loadReportedPosts()
+    }
+
+    // Cargar posts reportados
+    fun loadReportedPosts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                // Cargar todos los posts pendientes para el admin
-                mealPostRepository.getPendingMealPosts().collect { posts ->
+                mealPostRepository.getReportedMealPosts().collect { posts ->
                     _uiState.value = _uiState.value.copy(
-                        mealPosts = posts,
+                        reportedPosts = posts,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Error cargando reportes"
+                )
+            }
+        }
+    }
+
+    // Cargar todos los posts (para vista general)
+    fun loadAllPosts() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                mealPostRepository.getAllActivePosts().collect { posts ->
+                    _uiState.value = _uiState.value.copy(
+                        allPosts = posts,
                         isLoading = false,
                         error = null
                     )
@@ -50,23 +77,27 @@ class AdminViewModel @Inject constructor(
         }
     }
 
-    fun deleteMealPost(postId: String, reason: String = "") {
+    // Borrar post (admin)
+    fun deletePost(postId: String, reason: String = "") {
         viewModelScope.launch {
-            val result = mealPostRepository.deleteMealPost(postId)
+            val post = _uiState.value.reportedPosts.find { it.id == postId }
+                ?: _uiState.value.allPosts.find { it.id == postId }
+
+            val result = mealPostRepository.deletePostByAdmin(postId, reason)
             result.onSuccess {
                 // Notificar al usuario del borrado
-                val post = _uiState.value.mealPosts.find { it.id == postId }
                 post?.let {
                     notificationRepository.createNotification(
                         userId = it.userId,
-                        title = "Tu comida fue eliminada",
-                        message = if (reason.isNotEmpty()) "Motivo: $reason" else "Fue eliminada por incumplimiento de reglas",
-                        type = NotificationType.POST_REJECTED,
+                        title = "Tu publicación fue eliminada",
+                        message = if (reason.isNotEmpty()) "Motivo: $reason" else "Fue eliminada por incumplimiento de las normas de la comunidad",
+                        type = NotificationType.POST_DELETED_BY_ADMIN,
                         relatedPostId = postId
                     )
                 }
                 // Recargar posts
-                loadAllMealPosts()
+                loadReportedPosts()
+                loadAllPosts()
                 _uiState.value = _uiState.value.copy(
                     successMessage = "Publicación eliminada correctamente"
                 )
@@ -79,25 +110,15 @@ class AdminViewModel @Inject constructor(
         }
     }
 
-    fun approveMealPost(postId: String) {
+    // Aprobar post reportado (mantenerlo visible, limpiar reportes)
+    fun approveReportedPost(postId: String) {
         viewModelScope.launch {
-            val result = mealPostRepository.approveMealPost(postId, "")
+            val result = mealPostRepository.approveReportedPost(postId)
             result.onSuccess {
-                // Notificar al usuario
-                val post = _uiState.value.mealPosts.find { it.id == postId }
-                post?.let {
-                    notificationRepository.createNotification(
-                        userId = it.userId,
-                        title = "¡Tu comida fue aprobada!",
-                        message = "La comida '${it.title}' ha sido aprobada y está visible para otros usuarios",
-                        type = NotificationType.POST_APPROVED,
-                        relatedPostId = postId
-                    )
-                }
                 // Recargar posts
-                loadAllMealPosts()
+                loadReportedPosts()
                 _uiState.value = _uiState.value.copy(
-                    successMessage = "Publicación aprobada correctamente"
+                    successMessage = "Publicación aprobada - reportes eliminados"
                 )
             }
             result.onFailure { exception ->
@@ -106,6 +127,11 @@ class AdminViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun setSelectedTab(tab: Int) {
+        _uiState.value = _uiState.value.copy(selectedTab = tab)
+        if (tab == 0) loadReportedPosts() else loadAllPosts()
     }
 
     fun clearError() {
