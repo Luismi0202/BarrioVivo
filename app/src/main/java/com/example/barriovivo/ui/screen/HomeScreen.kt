@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -22,19 +23,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.barriovivo.domain.model.MealPost
 import com.example.barriovivo.ui.component.EmptyStateScreen
 import com.example.barriovivo.ui.component.LoadingScreen
 import com.example.barriovivo.ui.theme.GreenPrimary
+import com.example.barriovivo.ui.theme.GreenDark
 import com.example.barriovivo.ui.theme.OrangePrimary
 import com.example.barriovivo.ui.theme.TextDark
 import com.example.barriovivo.ui.theme.TextGray
+import com.example.barriovivo.ui.theme.ErrorRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,10 +47,12 @@ fun HomeScreen(
     nearbyMealPosts: List<MealPost> = emptyList(),
     userMealPosts: List<MealPost> = emptyList(),
     isLoading: Boolean = false,
+    unreadChatCount: Int = 0,
     onCreateMealClick: () -> Unit = {},
     onMealClick: (mealId: String) -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
+    onChatClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -55,17 +62,45 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "BarrioVivo",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "🍽️ BarrioVivo",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontSize = 22.sp
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = GreenPrimary,
                     titleContentColor = Color.White
                 ),
                 actions = {
+                    // Botón Chat con badge
+                    BadgedBox(
+                        badge = {
+                            if (unreadChatCount > 0) {
+                                Badge(
+                                    containerColor = ErrorRed,
+                                    contentColor = Color.White
+                                ) {
+                                    Text(
+                                        text = if (unreadChatCount > 99) "99+" else unreadChatCount.toString(),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        IconButton(onClick = onChatClick) {
+                            Icon(
+                                Icons.Default.Chat,
+                                contentDescription = "Chats",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onNotificationsClick) {
                         Icon(
                             Icons.Default.Notifications,
@@ -88,7 +123,8 @@ fun HomeScreen(
                 onClick = onCreateMealClick,
                 containerColor = OrangePrimary,
                 contentColor = Color.White,
-                shape = CircleShape
+                shape = CircleShape,
+                modifier = Modifier.size(64.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -102,8 +138,9 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(Color(0xFFF5F5F5))
         ) {
-            // Tabs
+            // Tabs mejorados
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.White,
@@ -116,7 +153,8 @@ fun HomeScreen(
                         text = {
                             Text(
                                 title,
-                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selectedTab == index) GreenPrimary else TextGray
                             )
                         }
                     )
@@ -132,7 +170,28 @@ fun HomeScreen(
                 when (selectedTab) {
                     0 -> {
                         if (nearbyMealPosts.isEmpty()) {
-                            EmptyStateScreen("No hay comidas cerca de ti aún 😊")
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        "🍜",
+                                        fontSize = 64.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "No hay comidas cerca de ti aún",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = TextGray
+                                    )
+                                    Text(
+                                        "¡Sé el primero en compartir!",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextGray.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
                         } else {
                             LazyColumn(
                                 contentPadding = PaddingValues(16.dp),
@@ -149,7 +208,28 @@ fun HomeScreen(
                     }
                     1 -> {
                         if (userMealPosts.isEmpty()) {
-                            EmptyStateScreen("Aún no has publicado comidas 🍽️")
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        "📦",
+                                        fontSize = 64.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "Aún no has publicado comidas",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = TextGray
+                                    )
+                                    Text(
+                                        "Toca el botón + para empezar",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = TextGray.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
                         } else {
                             LazyColumn(
                                 contentPadding = PaddingValues(16.dp),
@@ -180,31 +260,91 @@ fun MealCardItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
-            // Imagen principal
-            if (meal.photoUris.isNotEmpty()) {
-                AsyncImage(
-                    model = meal.photoUris.first(),
-                    contentDescription = meal.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
+            // Imagen principal con overlay gradiente
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            ) {
+                if (meal.photoUris.isNotEmpty()) {
+                    AsyncImage(
+                        model = meal.photoUris.first(),
+                        contentDescription = meal.title,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(GreenPrimary.copy(alpha = 0.3f), GreenDark.copy(alpha = 0.5f))
+                                )
+                            )
+                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("🍽️", fontSize = 48.sp)
+                    }
+                }
+
+                // Gradiente inferior para legibilidad
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
-                        .background(TextGray.copy(alpha = 0.3f))
-                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                    contentAlignment = Alignment.Center
+                        .height(60.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f))
+                            )
+                        )
+                )
+
+                // Badge de estado
+                Card(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (meal.isAvailable) GreenPrimary else TextGray
+                    ),
+                    shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("Sin foto", color = TextGray)
+                    Text(
+                        text = if (meal.isAvailable) "✓ Disponible" else "Reclamada",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Contador de fotos si hay más de una
+                if (meal.photoUris.size > 1) {
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black.copy(alpha = 0.6f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "📷 ${meal.photoUris.size}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White
+                        )
+                    }
                 }
             }
 
@@ -221,68 +361,54 @@ fun MealCardItem(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        tint = GreenPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                if (meal.description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = meal.location.city,
+                        text = meal.description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextGray
+                        color = TextGray,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Caduca: ${meal.expiryDate}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = OrangePrimary,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = GreenPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = meal.location.city,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextGray
+                        )
+                    }
 
-                    if (!meal.isAvailable) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = TextGray.copy(alpha = 0.2f)
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = "Reclamada",
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextGray
-                            )
-                        }
-                    } else {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = GreenPrimary.copy(alpha = 0.2f)
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = "Disponible",
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = GreenPrimary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = OrangePrimary.copy(alpha = 0.15f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "⏱️ Caduca: ${meal.expiryDate}",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = OrangePrimary,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }

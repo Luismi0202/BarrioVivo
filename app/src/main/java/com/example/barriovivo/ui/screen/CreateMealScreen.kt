@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -18,16 +19,19 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
@@ -35,6 +39,10 @@ import com.example.barriovivo.ui.component.BarrioVivoButton
 import com.example.barriovivo.ui.component.BarrioVivoTextField
 import com.example.barriovivo.ui.theme.ErrorRed
 import com.example.barriovivo.ui.theme.GreenPrimary
+import com.example.barriovivo.ui.theme.GreenDark
+import com.example.barriovivo.ui.theme.OrangePrimary
+import com.example.barriovivo.ui.theme.TextDark
+import com.example.barriovivo.ui.theme.TextGray
 import com.example.barriovivo.ui.viewmodel.CreateMealViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -111,305 +119,443 @@ fun CreateMealScreen(
     // DatePicker state
     val datePickerState = rememberDatePickerState()
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-    ) { padding ->
-        Column(
+    // Fondo semi-transparente para efecto de diálogo
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.3f))
+    ) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = Color.Transparent,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .padding(top = 40.dp)
+        ) { padding ->
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                Text(
-                    text = "Publicar Comida",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = GreenPrimary
-                )
-                IconButton(onClick = onClose) {
-                    Icon(Icons.Default.Close, contentDescription = "Cerrar")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Título (obligatorio)
-            Text(
-                text = "Nombre de la comida *",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            BarrioVivoTextField(
-                value = title,
-                onValueChange = {
-                    title = it
-                    localError = null
-                },
-                label = "Ej: Pizza margarita"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Descripción (opcional)
-            Text(
-                text = "Descripción (opcional)",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Detalles sobre la comida") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 5
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Fecha de caducidad (obligatoria)
-            Text(
-                text = "Fecha de caducidad *",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedButton(
-                onClick = { showDatePicker = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.DateRange, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (expiryDate != null) {
-                        expiryDate!!.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                    } else {
-                        "Seleccionar fecha"
-                    }
-                )
-            }
-            if (expiryDate == null) {
-                Text(
-                    text = "Debes mostrar la fecha de caducidad",
-                    color = ErrorRed,
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Fotos (obligatorio al menos una)
-            Text(
-                text = "Fotos *",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Foto principal
-            if (photoUris.isNotEmpty()) {
-                Card(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp)
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = photoUris.first()),
-                        contentDescription = "Foto principal",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+                    // Header con indicador de drag
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(TextGray.copy(alpha = 0.3f))
+                        )
+                    }
 
-            // Miniaturas de fotos
-            if (photoUris.size > 1) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(photoUris.drop(1)) { uri ->
-                        Card(
-                            modifier = Modifier.size(80.dp),
-                            shape = RoundedCornerShape(8.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "🍽️ Publicar Comida",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = GreenPrimary
+                            )
+                            Text(
+                                text = "Comparte lo que te sobra",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextGray
+                            )
+                        }
+                        IconButton(
+                            onClick = onClose,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(TextGray.copy(alpha = 0.1f), CircleShape)
                         ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(model = uri),
-                                contentDescription = "Foto",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Cerrar",
+                                tint = TextGray
                             )
                         }
                     }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
 
-            // Botones de añadir fotos
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        try {
-                            pickImagesLauncher.launch("image/*")
-                        } catch (_: Exception) {
-                            scope.launch { snackbarHostState.showSnackbar("Error al abrir galería") }
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Galería")
-                }
-                OutlinedButton(
-                    onClick = {
-                        requestCameraPermission.launch(android.Manifest.permission.CAMERA)
-                        try {
-                            val uri = createImageUri(context)
-                            pendingCameraUri = uri
-                            takePictureLauncher.launch(uri)
-                        } catch (_: Exception) {
-                            scope.launch { snackbarHostState.showSnackbar("Error al abrir cámara") }
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.CameraAlt, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Cámara")
-                }
-            }
+                    Spacer(modifier = Modifier.height(24.dp))
 
-            if (photoUris.isEmpty()) {
-                Text(
-                    text = "Debe haber al menos una foto",
-                    color = ErrorRed,
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-                )
-            } else if (photoUris.isNotEmpty()) {
-                TextButton(
-                    onClick = { photoUris = emptyList() },
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Text("Quitar todas las fotos")
-                }
-            }
-
-            // Errores
-            if (localError != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.1f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                    // Título (obligatorio)
                     Text(
-                        text = localError!!,
-                        color = ErrorRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(12.dp)
+                        text = "Nombre de la comida *",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextDark,
+                        fontWeight = FontWeight.Medium
                     )
-                }
-            }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = {
+                            title = it
+                            localError = null
+                        },
+                        placeholder = { Text("Ej: Pizza margarita, Ensalada...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                        singleLine = true
+                    )
 
-            if (uiState.error != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.1f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Descripción (opcional)
                     Text(
-                        text = uiState.error!!,
-                        color = ErrorRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(12.dp)
+                        text = "Descripción (opcional)",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextDark,
+                        fontWeight = FontWeight.Medium
                     )
-                }
-            }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        placeholder = { Text("Detalles sobre la comida, ingredientes...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3,
+                        maxLines = 5,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            unfocusedBorderColor = Color.LightGray
+                        )
+                    )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            // Botones de acción
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onClose,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancelar")
-                }
-
-                val canPublish = title.isNotBlank() && photoUris.isNotEmpty() && expiryDate != null && currentUser != null && !uiState.isLoading
-                BarrioVivoButton(
-                    text = if (uiState.isLoading) "Publicando..." else "Publicar",
-                    isLoading = uiState.isLoading,
-                    enabled = canPublish,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (currentUser == null) {
-                            localError = "Debes iniciar sesión para publicar"
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Debes iniciar sesión")
-                            }
-                            return@BarrioVivoButton
-                        }
-                        if (title.isBlank()) {
-                            localError = "El nombre de la comida es obligatorio"
-                            return@BarrioVivoButton
-                        }
-                        if (photoUris.isEmpty()) {
-                            localError = "Debes añadir al menos una foto"
-                            return@BarrioVivoButton
-                        }
-                        if (expiryDate == null) {
-                            localError = "Debes seleccionar la fecha de caducidad"
-                            return@BarrioVivoButton
-                        }
-
-                        // Limpiar errores previos
-                        localError = null
-                        viewModel.clearError()
-
-                        // Log para debug
-                        println("📤 Publicando comida: $title")
-                        println("👤 Usuario: ${currentUser.email}")
-                        println("📍 Ubicación: ${currentUser.location.city}")
-                        println("📸 Fotos: ${photoUris.size}")
-
-                        // Usar datos reales del usuario
-                        viewModel.createMealPost(
-                            userId = currentUser.id,
-                            userName = currentUser.email,
-                            title = title,
-                            description = description,
-                            photoUris = photoUris.map { it.toString() },
-                            expiryDate = expiryDate!!,
-                            location = currentUser.location
+                    // Fecha de caducidad (obligatoria)
+                    Text(
+                        text = "Fecha de caducidad *",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextDark,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { showDatePicker = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (expiryDate != null) GreenPrimary else TextGray
+                        )
+                    ) {
+                        Icon(Icons.Default.DateRange, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (expiryDate != null) {
+                                "📅 ${expiryDate!!.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}"
+                            } else {
+                                "Seleccionar fecha"
+                            },
+                            fontWeight = if (expiryDate != null) FontWeight.Medium else FontWeight.Normal
                         )
                     }
-                )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Fotos (obligatorio al menos una)
+                    Text(
+                        text = "Fotos *",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextDark,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Foto principal
+                    if (photoUris.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Box {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = photoUris.first()),
+                                    contentDescription = "Foto principal",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                // Botón para eliminar
+                                IconButton(
+                                    onClick = { photoUris = photoUris.drop(1) },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(8.dp)
+                                        .size(32.dp)
+                                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = "Eliminar",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+
+                                // Badge de foto principal
+                                Card(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(8.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = GreenPrimary
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "Foto principal",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // Miniaturas de fotos adicionales
+                    if (photoUris.size > 1) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(photoUris.drop(1)) { uri ->
+                                Card(
+                                    modifier = Modifier.size(80.dp),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Box {
+                                        Image(
+                                            painter = rememberAsyncImagePainter(model = uri),
+                                            contentDescription = "Foto",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                        IconButton(
+                                            onClick = { photoUris = photoUris.filter { it != uri } },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .size(24.dp)
+                                                .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Close,
+                                                contentDescription = "Eliminar",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    // Botones de añadir fotos
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                try {
+                                    pickImagesLauncher.launch("image/*")
+                                } catch (_: Exception) {
+                                    scope.launch { snackbarHostState.showSnackbar("Error al abrir galería") }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = GreenPrimary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Galería", color = GreenPrimary)
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                requestCameraPermission.launch(android.Manifest.permission.CAMERA)
+                                try {
+                                    val uri = createImageUri(context)
+                                    pendingCameraUri = uri
+                                    takePictureLauncher.launch(uri)
+                                } catch (_: Exception) {
+                                    scope.launch { snackbarHostState.showSnackbar("Error al abrir cámara") }
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = null, tint = OrangePrimary)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Cámara", color = OrangePrimary)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Avisos de validación en rojo
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = ErrorRed.copy(alpha = 0.08f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "⚠️ Requisitos para publicar:",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = if (photoUris.isNotEmpty()) "✅" else "❌",
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Debe haber al menos una foto",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (photoUris.isNotEmpty()) GreenDark else ErrorRed
+                                )
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = if (expiryDate != null) "✅" else "❌",
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Debe mostrar la fecha de caducidad",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (expiryDate != null) GreenDark else ErrorRed
+                                )
+                            }
+                        }
+                    }
+
+                    // Errores
+                    if (localError != null || uiState.error != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = ErrorRed.copy(alpha = 0.1f)),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = localError ?: uiState.error ?: "",
+                                color = ErrorRed,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Botones de acción
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onClose,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Cancelar")
+                        }
+
+                        val canPublish = title.isNotBlank() && photoUris.isNotEmpty() && expiryDate != null && currentUser != null && !uiState.isLoading
+
+                        Button(
+                            onClick = {
+                                if (currentUser == null) {
+                                    localError = "Debes iniciar sesión para publicar"
+                                    return@Button
+                                }
+                                if (title.isBlank()) {
+                                    localError = "El nombre de la comida es obligatorio"
+                                    return@Button
+                                }
+                                if (photoUris.isEmpty()) {
+                                    localError = "Debes añadir al menos una foto"
+                                    return@Button
+                                }
+                                if (expiryDate == null) {
+                                    localError = "Debes seleccionar la fecha de caducidad"
+                                    return@Button
+                                }
+
+                                localError = null
+                                viewModel.clearError()
+
+                                viewModel.createMealPost(
+                                    userId = currentUser.id,
+                                    userName = currentUser.email,
+                                    title = title,
+                                    description = description,
+                                    photoUris = photoUris.map { it.toString() },
+                                    expiryDate = expiryDate!!,
+                                    location = currentUser.location
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = canPublish,
+                            colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text("Publicar", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 
@@ -417,10 +563,10 @@ fun CreateMealScreen(
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
             scope.launch {
-                snackbarHostState.showSnackbar("¡Publicado con éxito!")
+                snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
             }
-            kotlinx.coroutines.delay(500) // Pequeño delay para que se vea el snackbar
-            viewModel.clearError() // Limpiar estado
+            kotlinx.coroutines.delay(800)
+            viewModel.clearError()
             onClose()
         }
     }
@@ -437,12 +583,15 @@ fun CreateMealScreen(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        expiryDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
-                    }
-                    showDatePicker = false
-                }) {
+                Button(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            expiryDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
+                        }
+                        showDatePicker = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                ) {
                     Text("Aceptar")
                 }
             },
@@ -454,7 +603,12 @@ fun CreateMealScreen(
         ) {
             DatePicker(
                 state = datePickerState,
-                title = { Text("Selecciona fecha de caducidad") }
+                title = {
+                    Text(
+                        "📅 Selecciona fecha de caducidad",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             )
         }
     }

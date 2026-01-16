@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
@@ -13,17 +14,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.barriovivo.ui.screen.AuthScreen
+import com.example.barriovivo.ui.screen.ChatConversationScreen
+import com.example.barriovivo.ui.screen.ChatListScreen
 import com.example.barriovivo.ui.screen.CreateMealScreen
 import com.example.barriovivo.ui.screen.HomeScreen
+import com.example.barriovivo.ui.screen.MealDetailScreen
 import com.example.barriovivo.ui.screen.NotificationScreen
 import com.example.barriovivo.ui.screen.ProfileScreen
 import com.example.barriovivo.ui.theme.BarrioVivoTheme
 import com.example.barriovivo.ui.viewmodel.AuthViewModel
+import com.example.barriovivo.ui.viewmodel.ChatViewModel
 import com.example.barriovivo.ui.viewmodel.HomeViewModel
+import com.example.barriovivo.ui.viewmodel.MealDetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
                 androidx.compose.material3.Scaffold(
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-                ) {
+                ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = if (authState.isLoggedIn) {
@@ -52,7 +60,9 @@ class MainActivity : ComponentActivity() {
                         } else {
                             "auth"
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
                     ) {
                         composable("auth") {
                             AuthScreen(
@@ -86,6 +96,8 @@ class MainActivity : ComponentActivity() {
                         composable("home") {
                             val homeViewModel: HomeViewModel = hiltViewModel()
                             val homeState by homeViewModel.uiState.collectAsState()
+                            val chatViewModel: ChatViewModel = hiltViewModel()
+                            val totalUnreadCount by chatViewModel.totalUnreadCount.collectAsState()
 
                             // Cargar datos solo cuando haya usuario y una vez
                             LaunchedEffect(authState.currentUser) {
@@ -103,15 +115,16 @@ class MainActivity : ComponentActivity() {
                                 nearbyMealPosts = homeState.nearbyMealPosts,
                                 userMealPosts = homeState.userMealPosts,
                                 isLoading = homeState.isLoading,
+                                unreadChatCount = totalUnreadCount,
                                 onCreateMealClick = { navController.navigate("create_meal") },
                                 onMealClick = { mealId ->
                                     navController.navigate("meal_detail/$mealId")
                                 },
                                 onNotificationsClick = { navController.navigate("notifications") },
                                 onProfileClick = { navController.navigate("profile") },
+                                onChatClick = { navController.navigate("chat_list") },
                                 onLogoutClick = {
                                     authViewModel.logout()
-                                    // Navegar a auth limpiando el backstack
                                     navController.navigate("auth") {
                                         popUpTo("home") { inclusive = true }
                                         launchSingleTop = true
@@ -134,8 +147,35 @@ class MainActivity : ComponentActivity() {
                             CreateMealScreen(onClose = { navController.popBackStack() })
                         }
 
-                        composable("meal_detail/{mealId}") {
-                            // Placeholder para detalle de comida
+                        composable(
+                            route = "meal_detail/{mealId}",
+                            arguments = listOf(navArgument("mealId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val mealId = backStackEntry.arguments?.getString("mealId") ?: ""
+                            val mealDetailViewModel: MealDetailViewModel = hiltViewModel()
+                            val mealDetailState by mealDetailViewModel.uiState.collectAsState()
+
+                            LaunchedEffect(mealId) {
+                                mealDetailViewModel.loadMealPost(mealId)
+                            }
+
+                            MealDetailScreen(
+                                mealPost = mealDetailState.mealPost,
+                                isLoading = mealDetailState.isLoading,
+                                isClaimLoading = mealDetailState.isClaimLoading,
+                                claimSuccess = mealDetailState.claimSuccess,
+                                error = mealDetailState.error,
+                                currentUserId = authState.currentUser?.id ?: "",
+                                onBack = { navController.popBackStack() },
+                                onClaimClick = {
+                                    authState.currentUser?.let { user ->
+                                        mealDetailViewModel.claimMealPost(mealId, user.id, user.email)
+                                    }
+                                },
+                                onGoToChat = { conversationId ->
+                                    navController.navigate("chat_conversation/$conversationId")
+                                }
+                            )
                         }
 
                         composable("notifications") {
@@ -152,6 +192,28 @@ class MainActivity : ComponentActivity() {
                             })
                         }
 
+                        // Chat List Screen
+                        composable("chat_list") {
+                            ChatListScreen(
+                                onBack = { navController.popBackStack() },
+                                onConversationClick = { conversationId ->
+                                    navController.navigate("chat_conversation/$conversationId")
+                                }
+                            )
+                        }
+
+                        // Chat Conversation Screen
+                        composable(
+                            route = "chat_conversation/{conversationId}",
+                            arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val conversationId = backStackEntry.arguments?.getString("conversationId") ?: ""
+                            ChatConversationScreen(
+                                conversationId = conversationId,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
                         composable("admin_dashboard") {
                             val adminViewModel: com.example.barriovivo.ui.viewmodel.AdminViewModel = hiltViewModel()
                             val adminState by adminViewModel.uiState.collectAsState()
@@ -160,7 +222,14 @@ class MainActivity : ComponentActivity() {
                                 pendingPosts = adminState.mealPosts,
                                 isLoading = adminState.isLoading,
                                 error = adminState.error,
-                                onBack = { navController.popBackStack() },
+                                onBack = {
+                                    authViewModel.logout()
+                                    navController.navigate("auth") {
+                                        popUpTo("admin_dashboard") { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                },
+                                onProfileClick = { navController.navigate("admin_profile") },
                                 onApprove = { postId ->
                                     adminViewModel.approveMealPost(postId)
                                 },
@@ -175,6 +244,20 @@ class MainActivity : ComponentActivity() {
                             LaunchedEffect(Unit) {
                                 adminViewModel.loadAllMealPosts()
                             }
+                        }
+
+                        // Admin Profile Screen
+                        composable("admin_profile") {
+                            ProfileScreen(
+                                onBack = { navController.popBackStack() },
+                                onLogout = {
+                                    authViewModel.logout()
+                                    navController.navigate("auth") {
+                                        popUpTo("admin_dashboard") { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
                         }
                     }
 
