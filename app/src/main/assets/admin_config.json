@@ -2,12 +2,20 @@
   {
     "id": "admin1",
     "email": "admin@barriovivo.com",
+    "password": "admin123",
     "userId": "admin_user_1"
   },
   {
     "id": "admin2",
-    "email": "moderator@barriovivo.com",
+    "email": "moderador@barriovivo.com",
+    "password": "moderador123",
     "userId": "admin_user_2"
+  },
+  {
+    "id": "admin3",
+    "email": "test@admin.com",
+    "password": "test123",
+    "userId": "admin_user_3"
   }
 ]
 

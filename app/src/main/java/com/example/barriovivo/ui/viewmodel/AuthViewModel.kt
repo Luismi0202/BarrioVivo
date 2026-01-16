@@ -19,7 +19,8 @@ data class AuthUiState(
     val error: String? = null,
     val currentUser: User? = null,
     val isLoggedIn: Boolean = false,
-    val userRole: UserRole = UserRole.USER
+    val userRole: UserRole = UserRole.USER,
+    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -180,5 +181,90 @@ class AuthViewModel @Inject constructor(
             }
         }
         return true
+    }
+
+    fun resetPassword(email: String, newPassword: String, confirmPassword: String) {
+        if (email.isBlank()) {
+            _uiState.value = _uiState.value.copy(error = "El email no puede estar vacío")
+            return
+        }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _uiState.value = _uiState.value.copy(error = "Email inválido")
+            return
+        }
+        if (newPassword.length < 6) {
+            _uiState.value = _uiState.value.copy(error = "La nueva contraseña debe tener al menos 6 caracteres")
+            return
+        }
+        if (newPassword != confirmPassword) {
+            _uiState.value = _uiState.value.copy(error = "Las contraseñas no coinciden")
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = userRepository.resetPassword(email, newPassword)
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = null,
+                    successMessage = "Contraseña actualizada"
+                )
+            }
+            result.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "No se pudo actualizar la contraseña"
+                )
+            }
+        }
+    }
+
+    fun consumeSuccessMessage() {
+        _uiState.value = _uiState.value.copy(successMessage = null)
+    }
+
+    fun changePassword(userId: String, currentPassword: String, newPassword: String) {
+        if (currentPassword.isBlank() || newPassword.isBlank()) {
+            _uiState.value = _uiState.value.copy(error = "Completa las contraseñas")
+            return
+        }
+        if (newPassword.length < 6) {
+            _uiState.value = _uiState.value.copy(error = "La nueva contraseña debe tener al menos 6 caracteres")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = userRepository.changePassword(userId, currentPassword, newPassword)
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = null,
+                    successMessage = "Contraseña cambiada"
+                )
+            }
+            result.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "No se pudo cambiar la contraseña"
+                )
+            }
+        }
+    }
+
+    fun deleteAccount(userId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val result = userRepository.deleteAccount(userId)
+            result.onSuccess {
+                _uiState.value = AuthUiState()
+            }
+            result.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "No se pudo eliminar la cuenta"
+                )
+            }
+        }
     }
 }

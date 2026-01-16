@@ -2,7 +2,6 @@ package com.example.barriovivo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.barriovivo.data.repository.AdminRepository
 import com.example.barriovivo.data.repository.MealPostRepository
 import com.example.barriovivo.data.repository.NotificationRepository
 import com.example.barriovivo.domain.model.MealPost
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AdminUiState(
-    val pendingPosts: List<MealPost> = emptyList(),
+    val mealPosts: List<MealPost> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null
@@ -24,20 +23,20 @@ data class AdminUiState(
 @HiltViewModel
 class AdminViewModel @Inject constructor(
     private val mealPostRepository: MealPostRepository,
-    private val notificationRepository: NotificationRepository,
-    private val adminRepository: AdminRepository
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminUiState())
     val uiState: StateFlow<AdminUiState> = _uiState.asStateFlow()
 
-    fun loadPendingPosts() {
+    fun loadAllMealPosts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
+                // Cargar todos los posts pendientes para el admin
                 mealPostRepository.getPendingMealPosts().collect { posts ->
                     _uiState.value = _uiState.value.copy(
-                        pendingPosts = posts,
+                        mealPosts = posts,
                         isLoading = false,
                         error = null
                     )
@@ -45,18 +44,47 @@ class AdminViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Error cargando publicaciones pendientes"
+                    error = e.message ?: "Error cargando publicaciones"
                 )
             }
         }
     }
 
-    fun approveMealPost(postId: String, adminComment: String = "") {
+    fun deleteMealPost(postId: String, reason: String = "") {
         viewModelScope.launch {
-            val result = mealPostRepository.approveMealPost(postId, adminComment)
+            val result = mealPostRepository.deleteMealPost(postId)
+            result.onSuccess {
+                // Notificar al usuario del borrado
+                val post = _uiState.value.mealPosts.find { it.id == postId }
+                post?.let {
+                    notificationRepository.createNotification(
+                        userId = it.userId,
+                        title = "Tu comida fue eliminada",
+                        message = if (reason.isNotEmpty()) "Motivo: $reason" else "Fue eliminada por incumplimiento de reglas",
+                        type = NotificationType.POST_REJECTED,
+                        relatedPostId = postId
+                    )
+                }
+                // Recargar posts
+                loadAllMealPosts()
+                _uiState.value = _uiState.value.copy(
+                    successMessage = "Publicación eliminada correctamente"
+                )
+            }
+            result.onFailure { exception ->
+                _uiState.value = _uiState.value.copy(
+                    error = exception.message ?: "Error al eliminar la publicación"
+                )
+            }
+        }
+    }
+
+    fun approveMealPost(postId: String) {
+        viewModelScope.launch {
+            val result = mealPostRepository.approveMealPost(postId, "")
             result.onSuccess {
                 // Notificar al usuario
-                val post = _uiState.value.pendingPosts.find { it.id == postId }
+                val post = _uiState.value.mealPosts.find { it.id == postId }
                 post?.let {
                     notificationRepository.createNotification(
                         userId = it.userId,
@@ -67,7 +95,7 @@ class AdminViewModel @Inject constructor(
                     )
                 }
                 // Recargar posts
-                loadPendingPosts()
+                loadAllMealPosts()
                 _uiState.value = _uiState.value.copy(
                     successMessage = "Publicación aprobada correctamente"
                 )
@@ -80,40 +108,12 @@ class AdminViewModel @Inject constructor(
         }
     }
 
-    fun rejectMealPost(postId: String, reason: String) {
-        viewModelScope.launch {
-            val result = mealPostRepository.rejectMealPost(postId, reason)
-            result.onSuccess {
-                // Notificar al usuario
-                val post = _uiState.value.pendingPosts.find { it.id == postId }
-                post?.let {
-                    notificationRepository.createNotification(
-                        userId = it.userId,
-                        title = "Tu comida fue rechazada",
-                        message = "Motivo: $reason",
-                        type = NotificationType.POST_REJECTED,
-                        relatedPostId = postId
-                    )
-                }
-                // Recargar posts
-                loadPendingPosts()
-                _uiState.value = _uiState.value.copy(
-                    successMessage = "Publicación rechazada correctamente"
-                )
-            }
-            result.onFailure { exception ->
-                _uiState.value = _uiState.value.copy(
-                    error = exception.message ?: "Error al rechazar la publicación"
-                )
-            }
-        }
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
-    fun clearMessages() {
-        _uiState.value = _uiState.value.copy(
-            error = null,
-            successMessage = null
-        )
+    fun clearSuccess() {
+        _uiState.value = _uiState.value.copy(successMessage = null)
     }
 }
 

@@ -12,12 +12,15 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
 
+@OptIn(kotlinx.serialization.InternalSerializationApi::class)
 @Serializable
 data class AdminConfigData(
     @SerialName("id")
     val id: String,
     @SerialName("email")
     val email: String,
+    @SerialName("password")
+    val password: String,
     @SerialName("userId")
     val userId: String
 )
@@ -27,7 +30,7 @@ class AdminRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    suspend fun initializeAdminsFromJson(): Result<Unit> = try {
+    suspend fun initializeAdminsFromJson(): Result<List<AdminConfigData>> = try {
         val jsonContent = readAdminConfigJson()
         val adminConfigs = Json.decodeFromString<List<AdminConfigData>>(jsonContent)
 
@@ -39,7 +42,9 @@ class AdminRepository @Inject constructor(
             )
             adminDao.insertAdmin(adminEntity)
         }
-        Result.success(Unit)
+
+        // Retornar la lista de configs para crear usuarios
+        Result.success(adminConfigs)
     } catch (e: Exception) {
         Result.failure(e)
     }
