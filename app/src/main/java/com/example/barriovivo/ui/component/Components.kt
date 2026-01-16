@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.barriovivo.ui.theme.ErrorRed
 import com.example.barriovivo.ui.theme.GreenPrimary
 import com.example.barriovivo.ui.theme.OrangePrimary
@@ -269,6 +273,78 @@ fun EmptyStateScreen(
     }
 }
 
-// Para BorderStroke que no está importado
+// Componentes adicionales para la aplicación
+
+@Composable
+fun PasswordTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    isPasswordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    errorMessage: String? = null
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = errorMessage != null,
+            singleLine = true,
+            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Contraseña"
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = onTogglePasswordVisibility) {
+                    Icon(
+                        imageVector = if (isPasswordVisible)
+                            Icons.Default.Visibility
+                        else
+                            Icons.Default.VisibilityOff,
+                        contentDescription = if (isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            },
+            shape = RoundedCornerShape(8.dp)
+        )
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = ErrorRed,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun NotificationBadge(
+    count: Int,
+    modifier: Modifier = Modifier
+) {
+    if (count > 0) {
+        Box(
+            modifier = modifier
+                .size(20.dp)
+                .background(ErrorRed, shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (count > 99) "99+" else count.toString(),
+                color = Color.White,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 10.sp
+            )
+        }
+    }
+}
 
 

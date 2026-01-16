@@ -29,7 +29,7 @@ class MealPostRepository @Inject constructor(
         userName: String,
         title: String,
         description: String,
-        photoUri: String,
+        photoUris: List<String>,
         expiryDate: LocalDate,
         location: Location
     ): Result<MealPost> = try {
@@ -40,7 +40,7 @@ class MealPostRepository @Inject constructor(
             userName = userName,
             title = title,
             description = description,
-            photoUri = photoUri,
+            photoUris = photoUris.joinToString(","), // Guardar como string separado por comas
             expiryDate = expiryDate,
             latitude = location.latitude,
             longitude = location.longitude,
@@ -115,6 +115,25 @@ class MealPostRepository @Inject constructor(
         Result.failure(e)
     }
 
+    suspend fun claimMealPost(postId: String, userId: String): Result<Unit> = try {
+        val post = mealPostDao.getMealPostById(postId)
+        if (post != null && post.isAvailable) {
+            mealPostDao.claimMealPost(postId, userId, LocalDateTime.now())
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Post no disponible"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getMealPostById(postId: String): Result<MealPost?> = try {
+        val post = mealPostDao.getMealPostById(postId)
+        Result.success(post?.toDomain())
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     suspend fun deleteMealPost(postId: String): Result<Unit> = try {
         val post = mealPostDao.getMealPostById(postId)
         if (post != null) {
@@ -150,7 +169,7 @@ class MealPostRepository @Inject constructor(
             userName = userName,
             title = title,
             description = description,
-            photoUri = photoUri,
+            photoUris = photoUris.split(",").filter { it.isNotBlank() }, // Convertir de string a lista
             expiryDate = expiryDate,
             location = Location(
                 city = city,
@@ -159,7 +178,10 @@ class MealPostRepository @Inject constructor(
             ),
             createdAt = createdAt,
             status = MealPostStatus.valueOf(status),
-            adminComment = adminComment
+            adminComment = adminComment,
+            isAvailable = isAvailable,
+            claimedByUserId = claimedByUserId,
+            claimedAt = claimedAt
         )
     }
 }

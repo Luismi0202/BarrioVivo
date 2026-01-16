@@ -46,7 +46,13 @@ class AuthViewModel @Inject constructor(
                             isLoggedIn = true,
                             userRole = user.role
                         )
+                    } else {
+                        // Usuario no encontrado, asegurar estado limpio
+                        _uiState.value = AuthUiState()
                     }
+                } else {
+                    // No hay usuario logueado
+                    _uiState.value = AuthUiState()
                 }
             }
         }
@@ -176,4 +182,3 @@ class AuthViewModel @Inject constructor(
         return true
     }
 }
-

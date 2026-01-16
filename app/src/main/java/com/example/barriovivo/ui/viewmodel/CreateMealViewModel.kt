@@ -35,7 +35,7 @@ class CreateMealViewModel @Inject constructor(
         userName: String,
         title: String,
         description: String,
-        photoUri: String,
+        photoUris: List<String>,
         expiryDate: LocalDate,
         location: Location
     ) {
@@ -54,9 +54,10 @@ class CreateMealViewModel @Inject constructor(
             return
         }
 
-        if (photoUri.isBlank()) {
+        // Validación: al menos una foto obligatoria
+        if (photoUris.isEmpty() || photoUris.all { it.isBlank() }) {
             _uiState.value = _uiState.value.copy(
-                error = "Es obligatorio añadir una foto"
+                error = "Es obligatorio añadir al menos una foto"
             )
             return
         }
@@ -69,7 +70,7 @@ class CreateMealViewModel @Inject constructor(
                 userName = userName,
                 title = title,
                 description = description,
-                photoUri = photoUri,
+                photoUris = photoUris,
                 expiryDate = expiryDate,
                 location = location
             )
@@ -100,4 +101,3 @@ class CreateMealViewModel @Inject constructor(
         )
     }
 }
-

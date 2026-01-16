@@ -42,11 +42,14 @@ interface MealPostDao {
     @Query("SELECT * FROM meal_posts WHERE userId = :userId ORDER BY createdAt DESC")
     fun getUserMealPosts(userId: String): Flow<List<MealPostEntity>>
 
-    @Query("SELECT * FROM meal_posts WHERE status = 'APPROVED' AND expiryDate >= :todayDate ORDER BY createdAt DESC")
+    @Query("SELECT * FROM meal_posts WHERE status = 'APPROVED' AND expiryDate >= :todayDate AND isAvailable = 1 ORDER BY createdAt DESC")
     fun getApprovedMealPosts(todayDate: LocalDate): Flow<List<MealPostEntity>>
 
     @Query("SELECT * FROM meal_posts WHERE status = 'PENDING' ORDER BY createdAt DESC")
     fun getPendingMealPosts(): Flow<List<MealPostEntity>>
+
+    @Query("UPDATE meal_posts SET isAvailable = 0, claimedByUserId = :userId, claimedAt = :claimedAt WHERE id = :postId")
+    suspend fun claimMealPost(postId: String, userId: String, claimedAt: java.time.LocalDateTime)
 
     @Update
     suspend fun updateMealPost(mealPost: MealPostEntity)
@@ -83,5 +86,56 @@ interface AdminDao {
 
     @Query("SELECT * FROM admins")
     suspend fun getAllAdmins(): List<AdminEntity>
+}
+
+@Dao
+interface ChatConversationDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertConversation(conversation: com.example.barriovivo.data.database.entity.ChatConversationEntity)
+
+    @Query("SELECT * FROM chat_conversations WHERE id = :id")
+    suspend fun getConversationById(id: String): com.example.barriovivo.data.database.entity.ChatConversationEntity?
+
+    @Query("SELECT * FROM chat_conversations WHERE (creatorUserId = :userId OR claimerUserId = :userId) AND isActive = 1 ORDER BY lastMessageAt DESC")
+    fun getUserActiveConversations(userId: String): Flow<List<com.example.barriovivo.data.database.entity.ChatConversationEntity>>
+
+    @Query("SELECT * FROM chat_conversations WHERE mealPostId = :mealPostId")
+    suspend fun getConversationByMealPostId(mealPostId: String): com.example.barriovivo.data.database.entity.ChatConversationEntity?
+
+    @Query("UPDATE chat_conversations SET isActive = 0, closedAt = :closedAt WHERE id = :conversationId")
+    suspend fun closeConversation(conversationId: String, closedAt: java.time.LocalDateTime)
+
+    @Query("UPDATE chat_conversations SET unreadCountCreator = :count WHERE id = :conversationId")
+    suspend fun updateUnreadCountCreator(conversationId: String, count: Int)
+
+    @Query("UPDATE chat_conversations SET unreadCountClaimer = :count WHERE id = :conversationId")
+    suspend fun updateUnreadCountClaimer(conversationId: String, count: Int)
+
+    @Query("UPDATE chat_conversations SET lastMessageAt = :timestamp WHERE id = :conversationId")
+    suspend fun updateLastMessageAt(conversationId: String, timestamp: java.time.LocalDateTime)
+
+    @Update
+    suspend fun updateConversation(conversation: com.example.barriovivo.data.database.entity.ChatConversationEntity)
+
+    @Delete
+    suspend fun deleteConversation(conversation: com.example.barriovivo.data.database.entity.ChatConversationEntity)
+}
+
+@Dao
+interface ChatMessageDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMessage(message: com.example.barriovivo.data.database.entity.ChatMessageEntity)
+
+    @Query("SELECT * FROM chat_messages WHERE conversationId = :conversationId ORDER BY sentAt ASC")
+    fun getConversationMessages(conversationId: String): Flow<List<com.example.barriovivo.data.database.entity.ChatMessageEntity>>
+
+    @Query("SELECT COUNT(*) FROM chat_messages WHERE conversationId = :conversationId AND senderId != :userId AND isRead = 0")
+    suspend fun getUnreadMessageCount(conversationId: String, userId: String): Int
+
+    @Query("UPDATE chat_messages SET isRead = 1 WHERE conversationId = :conversationId AND senderId != :userId")
+    suspend fun markMessagesAsRead(conversationId: String, userId: String)
+
+    @Delete
+    suspend fun deleteMessage(message: com.example.barriovivo.data.database.entity.ChatMessageEntity)
 }
 

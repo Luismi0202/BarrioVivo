@@ -113,6 +113,53 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun changePassword(
+        userId: String,
+        currentPassword: String,
+        newPassword: String
+    ): Result<Unit> = try {
+        val user = userDao.getUserById(userId)
+        if (user == null) {
+            Result.failure(Exception("Usuario no encontrado"))
+        } else if (!verifyPassword(currentPassword, user.passwordHash)) {
+            Result.failure(Exception("Contraseña actual incorrecta"))
+        } else {
+            val newPasswordHash = hashPassword(newPassword)
+            val updatedUser = user.copy(passwordHash = newPasswordHash)
+            userDao.updateUser(updatedUser)
+            Result.success(Unit)
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun resetPassword(email: String, newPassword: String): Result<Unit> = try {
+        val user = userDao.getUserByEmail(email)
+        if (user == null) {
+            Result.failure(Exception("Usuario no encontrado"))
+        } else {
+            val newPasswordHash = hashPassword(newPassword)
+            val updatedUser = user.copy(passwordHash = newPasswordHash)
+            userDao.updateUser(updatedUser)
+            Result.success(Unit)
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun deleteAccount(userId: String): Result<Unit> = try {
+        val user = userDao.getUserById(userId)
+        if (user != null) {
+            userDao.deleteUser(user)
+            logoutUser()
+            Result.success(Unit)
+        } else {
+            Result.failure(Exception("Usuario no encontrado"))
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     private suspend fun saveCurrentUser(userId: String, role: String) {
         dataStore.edit { preferences ->
             preferences[CURRENT_USER_ID] = userId

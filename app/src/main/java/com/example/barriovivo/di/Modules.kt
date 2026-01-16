@@ -16,6 +16,8 @@ import com.example.barriovivo.data.database.dao.UserDao
 import com.example.barriovivo.data.database.dao.MealPostDao
 import com.example.barriovivo.data.database.dao.NotificationDao
 import com.example.barriovivo.data.database.dao.AdminDao
+import com.example.barriovivo.data.database.dao.ChatConversationDao
+import com.example.barriovivo.data.database.dao.ChatMessageDao
 
 private const val USER_PREFERENCES = "user_preferences"
 
@@ -65,5 +67,17 @@ object DatabaseModule {
     @Provides
     fun provideAdminDao(appDatabase: AppDatabase): AdminDao {
         return appDatabase.adminDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideChatConversationDao(appDatabase: AppDatabase): ChatConversationDao {
+        return appDatabase.chatConversationDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideChatMessageDao(appDatabase: AppDatabase): ChatMessageDao {
+        return appDatabase.chatMessageDao()
     }
 }

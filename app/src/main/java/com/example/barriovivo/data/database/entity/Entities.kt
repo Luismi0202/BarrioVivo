@@ -29,14 +29,17 @@ data class MealPostEntity(
     val userName: String,
     val title: String,
     val description: String,
-    val photoUri: String,
+    val photoUris: String, // Almacenado como JSON string separado por comas
     val expiryDate: LocalDate,
     val latitude: Double,
     val longitude: Double,
     val city: String,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val status: String = MealPostStatus.PENDING.name,
-    val adminComment: String = ""
+    val adminComment: String = "",
+    val isAvailable: Boolean = true,
+    val claimedByUserId: String? = null,
+    val claimedAt: LocalDateTime? = null
 )
 
 @Entity(tableName = "notifications")
@@ -58,5 +61,32 @@ data class AdminEntity(
     val id: String,
     val email: String,
     val userId: String
+)
+
+@Entity(tableName = "chat_conversations")
+data class ChatConversationEntity(
+    @PrimaryKey
+    val id: String,
+    val mealPostId: String,
+    val creatorUserId: String,
+    val claimerUserId: String,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val lastMessageAt: LocalDateTime = LocalDateTime.now(),
+    val isActive: Boolean = true,
+    val closedAt: LocalDateTime? = null,
+    val unreadCountCreator: Int = 0,
+    val unreadCountClaimer: Int = 0
+)
+
+@Entity(tableName = "chat_messages")
+data class ChatMessageEntity(
+    @PrimaryKey
+    val id: String,
+    val conversationId: String,
+    val senderId: String,
+    val senderName: String,
+    val message: String,
+    val sentAt: LocalDateTime = LocalDateTime.now(),
+    val isRead: Boolean = false
 )
 

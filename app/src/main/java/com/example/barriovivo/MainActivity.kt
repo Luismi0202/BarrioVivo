@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -48,10 +49,13 @@ class MainActivity : ComponentActivity() {
                             onErrorDismiss = { authViewModel.clearError() }
                         )
 
-                        // Navigate to home when logged in
-                        if (authState.isLoggedIn) {
-                            navController.navigate("home") {
-                                popUpTo("auth") { inclusive = true }
+                        // Navegación a home controlada por efecto para evitar duplicidad
+                        LaunchedEffect(authState.isLoggedIn) {
+                            if (authState.isLoggedIn) {
+                                navController.navigate("home") {
+                                    popUpTo("auth") { inclusive = true }
+                                    launchSingleTop = true
+                                }
                             }
                         }
                     }
@@ -60,10 +64,16 @@ class MainActivity : ComponentActivity() {
                         val homeViewModel: HomeViewModel = hiltViewModel()
                         val homeState by homeViewModel.uiState.collectAsState()
 
-                        // Load nearby meals (using dummy coordinates for now)
-                        homeViewModel.loadNearbyMealPosts(40.4168, -3.7038) // Madrid coordinates
-                        authState.currentUser?.let {
-                            homeViewModel.loadUserMealPosts(it.id)
+                        // Cargar datos solo cuando haya usuario y una vez
+                        LaunchedEffect(authState.currentUser) {
+                            authState.currentUser?.let { user ->
+                                homeViewModel.loadUserMealPosts(user.id)
+                                val lat = user.location.latitude
+                                val lon = user.location.longitude
+                                if (lat != 0.0 || lon != 0.0) {
+                                    homeViewModel.loadNearbyMealPosts(lat, lon)
+                                }
+                            }
                         }
 
                         HomeScreen(
@@ -78,11 +88,23 @@ class MainActivity : ComponentActivity() {
                             onProfileClick = { navController.navigate("profile") },
                             onLogoutClick = {
                                 authViewModel.logout()
+                                // Navegar a auth limpiando el backstack
                                 navController.navigate("auth") {
                                     popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
                                 }
                             }
                         )
+
+                        // Si el estado cambia a deslogueado, garantizar regreso a auth
+                        LaunchedEffect(authState.isLoggedIn) {
+                            if (!authState.isLoggedIn) {
+                                navController.navigate("auth") {
+                                    popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        }
                     }
 
                     composable("create_meal") {
@@ -105,4 +127,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

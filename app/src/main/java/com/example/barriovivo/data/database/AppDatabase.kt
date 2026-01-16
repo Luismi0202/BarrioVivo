@@ -5,23 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.barriovivo.data.database.dao.UserDao
-import com.example.barriovivo.data.database.dao.MealPostDao
-import com.example.barriovivo.data.database.dao.NotificationDao
-import com.example.barriovivo.data.database.dao.AdminDao
-import com.example.barriovivo.data.database.entity.UserEntity
-import com.example.barriovivo.data.database.entity.MealPostEntity
-import com.example.barriovivo.data.database.entity.NotificationEntity
-import com.example.barriovivo.data.database.entity.AdminEntity
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.barriovivo.data.database.dao.*
+import com.example.barriovivo.data.database.entity.*
 
 @Database(
     entities = [
         UserEntity::class,
         MealPostEntity::class,
         NotificationEntity::class,
-        AdminEntity::class
+        AdminEntity::class,
+        ChatConversationEntity::class,
+        ChatMessageEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class)
@@ -30,10 +28,53 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun mealPostDao(): MealPostDao
     abstract fun notificationDao(): NotificationDao
     abstract fun adminDao(): AdminDao
+    abstract fun chatConversationDao(): ChatConversationDao
+    abstract fun chatMessageDao(): ChatMessageDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Agregar nuevas columnas a meal_posts
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN isAvailable INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN claimedByUserId TEXT")
+                database.execSQL("ALTER TABLE meal_posts ADD COLUMN claimedAt TEXT")
+
+                // Renombrar columna photoUri a photoUris y migrar datos
+                database.execSQL("ALTER TABLE meal_posts RENAME COLUMN photoUri TO photoUris")
+
+                // Crear tabla de conversaciones de chat
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS chat_conversations (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        mealPostId TEXT NOT NULL,
+                        creatorUserId TEXT NOT NULL,
+                        claimerUserId TEXT NOT NULL,
+                        createdAt TEXT NOT NULL,
+                        lastMessageAt TEXT NOT NULL,
+                        isActive INTEGER NOT NULL DEFAULT 1,
+                        closedAt TEXT,
+                        unreadCountCreator INTEGER NOT NULL DEFAULT 0,
+                        unreadCountClaimer INTEGER NOT NULL DEFAULT 0
+                    )
+                """)
+
+                // Crear tabla de mensajes de chat
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS chat_messages (
+                        id TEXT PRIMARY KEY NOT NULL,
+                        conversationId TEXT NOT NULL,
+                        senderId TEXT NOT NULL,
+                        senderName TEXT NOT NULL,
+                        message TEXT NOT NULL,
+                        sentAt TEXT NOT NULL,
+                        isRead INTEGER NOT NULL DEFAULT 0
+                    )
+                """)
+            }
+        }
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -41,7 +82,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "barriovivo_database"
-                ).build()
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigration() // Solo para desarrollo
+                    .build()
                 INSTANCE = instance
                 instance
             }
