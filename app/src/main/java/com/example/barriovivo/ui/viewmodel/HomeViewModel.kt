@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.barriovivo.data.repository.MealPostRepository
 import com.example.barriovivo.domain.model.MealPost
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +27,20 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private var nearbyPostsJob: Job? = null
+    private var userPostsJob: Job? = null
+
+    // Guardar las coordenadas para poder refrescar
+    private var lastLatitude: Double = 0.0
+    private var lastLongitude: Double = 0.0
+    private var lastUserId: String = ""
+
     fun loadNearbyMealPosts(userLatitude: Double, userLongitude: Double) {
-        viewModelScope.launch {
+        lastLatitude = userLatitude
+        lastLongitude = userLongitude
+
+        nearbyPostsJob?.cancel()
+        nearbyPostsJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 mealPostRepository.getNearbyActiveMealPosts(
@@ -50,7 +63,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun loadUserMealPosts(userId: String) {
-        viewModelScope.launch {
+        lastUserId = userId
+
+        userPostsJob?.cancel()
+        userPostsJob = viewModelScope.launch {
             try {
                 mealPostRepository.getUserMealPosts(userId).collect { posts ->
                     _uiState.value = _uiState.value.copy(
@@ -63,6 +79,16 @@ class HomeViewModel @Inject constructor(
                     error = e.message ?: "Error cargando tus comidas"
                 )
             }
+        }
+    }
+
+    // Forzar recarga de datos
+    fun refresh() {
+        if (lastLatitude != 0.0 || lastLongitude != 0.0) {
+            loadNearbyMealPosts(lastLatitude, lastLongitude)
+        }
+        if (lastUserId.isNotBlank()) {
+            loadUserMealPosts(lastUserId)
         }
     }
 

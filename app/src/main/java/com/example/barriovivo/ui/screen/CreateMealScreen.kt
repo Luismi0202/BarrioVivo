@@ -90,6 +90,17 @@ fun CreateMealScreen(
         contract = ActivityResultContracts.GetMultipleContents(),
         onResult = { uris ->
             if (uris.isNotEmpty()) {
+                // Tomar permisos persistentes para las URIs
+                uris.forEach { uri ->
+                    try {
+                        context.contentResolver.takePersistableUriPermission(
+                            uri,
+                            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        )
+                    } catch (e: Exception) {
+                        // Si falla, no pasa nada, las URIs aún funcionarán durante la sesión
+                    }
+                }
                 photoUris = (photoUris + uris).distinct()
             }
         }
@@ -571,22 +582,27 @@ fun CreateMealScreen(
         }
     }
 
-    // Observar el éxito de la publicación
-    LaunchedEffect(uiState.success) {
-        if (uiState.success) {
-            snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
-            // Esperar un poco para que el usuario vea el mensaje
-            kotlinx.coroutines.delay(500)
-            // Resetear estado y cerrar
-            viewModel.resetState()
-            onClose()
-        }
-    }
-
-    // Observar errores del ViewModel
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            localError = error
+    // Observar el estado de la UI para mostrar mensajes y navegar
+    LaunchedEffect(uiState) {
+        when {
+            uiState.success -> {
+                snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
+                // Esperar un poco para que el usuario vea el mensaje
+                kotlinx.coroutines.delay(500)
+                // Resetear estado y cerrar
+                viewModel.resetState()
+                onClose()
+            }
+            uiState.error != null -> {
+                localError = uiState.error
+                snackbarHostState.showSnackbar(uiState.error ?: "Error desconocido")
+                viewModel.clearError() // Limpiar el error después de mostrarlo
+            }
+            uiState.expiryDateError != null -> {
+                localError = uiState.expiryDateError
+                snackbarHostState.showSnackbar(uiState.expiryDateError ?: "Error en la fecha")
+                viewModel.clearError() // Limpiar el error después de mostrarlo
+            }
         }
     }
 

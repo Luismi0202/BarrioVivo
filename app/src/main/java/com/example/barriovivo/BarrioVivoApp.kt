@@ -27,9 +27,7 @@ class BarrioVivoApp : Application() {
         super.onCreate()
 
         // Inicializar Timber para logging
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+        Timber.plant(Timber.DebugTree())
 
         // Inicializar administradores desde JSON
         applicationScope.launch {

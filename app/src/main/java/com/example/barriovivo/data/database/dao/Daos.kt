@@ -117,6 +117,9 @@ interface ChatConversationDao {
     @Query("SELECT * FROM chat_conversations WHERE (creatorUserId = :userId OR claimerUserId = :userId) AND isActive = 1 ORDER BY lastMessageAt DESC")
     fun getUserActiveConversations(userId: String): Flow<List<com.example.barriovivo.data.database.entity.ChatConversationEntity>>
 
+    @Query("SELECT * FROM chat_conversations WHERE isActive = 1 ORDER BY lastMessageAt DESC")
+    fun getAllActiveConversations(): Flow<List<com.example.barriovivo.data.database.entity.ChatConversationEntity>>
+
     @Query("SELECT * FROM chat_conversations WHERE mealPostId = :mealPostId")
     suspend fun getConversationByMealPostId(mealPostId: String): com.example.barriovivo.data.database.entity.ChatConversationEntity?
 

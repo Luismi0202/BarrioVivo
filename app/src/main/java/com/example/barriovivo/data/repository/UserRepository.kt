@@ -180,6 +180,7 @@ class UserRepository @Inject constructor(
         return User(
             id = id,
             email = email,
+            name = name,
             password = "", // No devolvemos la contraseña
             location = Location(
                 city = city,

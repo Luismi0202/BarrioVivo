@@ -12,6 +12,7 @@ data class UserEntity(
     @PrimaryKey
     val id: String,
     val email: String,
+    val name: String = "",
     val passwordHash: String,
     val city: String,
     val latitude: Double,

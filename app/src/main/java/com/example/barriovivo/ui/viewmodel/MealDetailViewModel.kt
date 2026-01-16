@@ -142,8 +142,7 @@ class MealDetailViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(reportSuccess = false)
     }
 
-    // Reportar un post
-    fun reportMealPost(postId: String, reporterId: String, reason: String, adminUserId: String) {
+    fun reportMealPost(postId: String, reporterId: String, reason: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isReportLoading = true)
 
@@ -177,9 +176,9 @@ class MealDetailViewModel @Inject constructor(
             val result = mealPostRepository.reportMealPost(postId, reporterId, reason)
 
             result.onSuccess {
-                // Notificar al admin
+                // Notificar al admin (ID genérico, en un caso real sería una lista de admins)
                 notificationRepository.createNotification(
-                    userId = adminUserId,
+                    userId = "admin_user_id",
                     title = "⚠️ Nueva publicación reportada",
                     message = "La comida '${mealPost.title}' ha sido reportada. Motivo: $reason",
                     type = NotificationType.POST_REPORTED,

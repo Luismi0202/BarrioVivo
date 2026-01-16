@@ -19,7 +19,7 @@ import com.example.barriovivo.data.database.entity.*
         ChatConversationEntity::class,
         ChatMessageEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class)
@@ -88,6 +88,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Agregar campo name a users
+                database.execSQL("ALTER TABLE users ADD COLUMN name TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -95,7 +102,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "barriovivo_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .fallbackToDestructiveMigration() // Solo para desarrollo
                     .build()
                 INSTANCE = instance

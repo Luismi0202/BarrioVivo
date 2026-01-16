@@ -492,9 +492,9 @@ fun MealDetailScreen(
     }
 
     // Diálogo de éxito al reclamar
-    if (showClaimSuccessDialog) {
+    if (claimSuccess) {
         AlertDialog(
-            onDismissRequest = { showClaimSuccessDialog = false },
+            onDismissRequest = { /* No se puede cerrar hasta que el usuario interactúe */ },
             icon = {
                 Text("🎉", fontSize = 48.sp)
             },
@@ -514,8 +514,8 @@ fun MealDetailScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        showClaimSuccessDialog = false
-                        // Ir al chat si hay conversationId
+                        // El conversationId se obtiene del estado del ViewModel
+                        mealPost?.let { onGoToChat(it.id) }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
                 ) {
@@ -529,10 +529,7 @@ fun MealDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showClaimSuccessDialog = false
-                    onBack()
-                }) {
+                TextButton(onClick = onBack) {
                     Text("Volver")
                 }
             }
@@ -547,7 +544,7 @@ fun MealDetailScreen(
                 Icon(
                     Icons.Default.Flag,
                     contentDescription = null,
-                    tint = OrangePrimary,
+                    tint = ErrorRed,
                     modifier = Modifier.size(48.dp)
                 )
             },
@@ -560,7 +557,7 @@ fun MealDetailScreen(
             text = {
                 Column {
                     Text(
-                        "¿Por qué quieres reportar esta publicación?",
+                        "¿Por qué quieres reportar esta publicación? Tu reporte es anónimo.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
@@ -583,11 +580,10 @@ fun MealDetailScreen(
                         if (reportReason.isNotBlank()) {
                             onReportClick(reportReason)
                             showReportDialog = false
-                            reportReason = ""
                         }
                     },
                     enabled = reportReason.isNotBlank() && !isReportLoading,
-                    colors = ButtonDefaults.buttonColors(containerColor = OrangePrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
                 ) {
                     if (isReportLoading) {
                         CircularProgressIndicator(
@@ -612,9 +608,9 @@ fun MealDetailScreen(
     }
 
     // Diálogo de éxito al reportar
-    if (showReportSuccessDialog) {
+    if (reportSuccess) {
         AlertDialog(
-            onDismissRequest = { showReportSuccessDialog = false },
+            onDismissRequest = { /* No se puede cerrar */ },
             icon = {
                 Text("✅", fontSize = 48.sp)
             },
@@ -633,7 +629,7 @@ fun MealDetailScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = { showReportSuccessDialog = false },
+                    onClick = onBack,
                     colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
                 ) {
                     Text("Entendido")

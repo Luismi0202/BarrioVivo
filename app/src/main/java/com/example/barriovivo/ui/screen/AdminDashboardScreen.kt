@@ -41,6 +41,12 @@ fun AdminDashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Cargar todos los posts al iniciar
+    LaunchedEffect(Unit) {
+        viewModel.loadAllPosts()
+        viewModel.loadReportedPosts()
+    }
+
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -70,13 +76,29 @@ fun AdminDashboardScreen(
                     containerColor = GreenDark
                 ),
                 actions = {
-                    // Notificaciones
-                    IconButton(onClick = onNotificationsClick) {
-                        Icon(
-                            Icons.Default.Notifications,
-                            contentDescription = "Notificaciones",
-                            tint = Color.White
-                        )
+                    // Notificaciones (reportes)
+                    BadgedBox(
+                        badge = {
+                            if (uiState.reportedPosts.isNotEmpty()) {
+                                Badge(
+                                    containerColor = ErrorRed,
+                                    contentColor = Color.White
+                                ) {
+                                    Text(
+                                        text = "${uiState.reportedPosts.size}",
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        IconButton(onClick = onNotificationsClick) {
+                            Icon(
+                                Icons.Default.Notifications,
+                                contentDescription = "Notificaciones",
+                                tint = Color.White
+                            )
+                        }
                     }
                     // Perfil
                     IconButton(onClick = onProfileClick) {
@@ -121,6 +143,23 @@ fun AdminDashboardScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
+                            text = "📦",
+                            fontSize = 32.sp
+                        )
+                        Text(
+                            text = "${uiState.allPosts.size}",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = GreenPrimary
+                        )
+                        Text(
+                            text = "Total Posts",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextGray
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
                             text = "⚠️",
                             fontSize = 32.sp
                         )
@@ -139,14 +178,43 @@ fun AdminDashboardScreen(
                 }
             }
 
-            // Título sección
-            Text(
-                text = "Posts Reportados",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = TextDark,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+            // Tabs para cambiar entre todos los posts y reportados
+            TabRow(
+                selectedTabIndex = uiState.selectedTab,
+                containerColor = Color.White,
+                contentColor = GreenPrimary
+            ) {
+                Tab(
+                    selected = uiState.selectedTab == 0,
+                    onClick = { viewModel.setSelectedTab(0) },
+                    text = {
+                        Text(
+                            "Todos los Posts",
+                            fontWeight = if (uiState.selectedTab == 0) FontWeight.Bold else FontWeight.Normal,
+                            color = if (uiState.selectedTab == 0) GreenPrimary else TextGray
+                        )
+                    }
+                )
+                Tab(
+                    selected = uiState.selectedTab == 1,
+                    onClick = { viewModel.setSelectedTab(1) },
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Reportados",
+                                fontWeight = if (uiState.selectedTab == 1) FontWeight.Bold else FontWeight.Normal,
+                                color = if (uiState.selectedTab == 1) ErrorRed else TextGray
+                            )
+                            if (uiState.reportedPosts.isNotEmpty()) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Badge(containerColor = ErrorRed) {
+                                    Text("${uiState.reportedPosts.size}")
+                                }
+                            }
+                        }
+                    }
+                )
+            }
 
             if (uiState.isLoading) {
                 Box(
@@ -155,37 +223,42 @@ fun AdminDashboardScreen(
                 ) {
                     CircularProgressIndicator(color = GreenPrimary)
                 }
-            } else if (uiState.reportedPosts.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("✅", fontSize = 64.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No hay reportes pendientes",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = TextGray
-                        )
-                        Text(
-                            text = "¡Todo está bajo control!",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextGray.copy(alpha = 0.7f)
-                        )
-                    }
-                }
             } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(uiState.reportedPosts) { post ->
-                        ReportedPostCard(
-                            mealPost = post,
-                            onApprove = { viewModel.approveReportedPost(post.id) },
-                            onDelete = { reason -> viewModel.deletePost(post.id, reason) }
-                        )
+                val postsToShow = if (uiState.selectedTab == 0) uiState.allPosts else uiState.reportedPosts
+
+                if (postsToShow.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(if (uiState.selectedTab == 0) "📭" else "✅", fontSize = 64.sp)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = if (uiState.selectedTab == 0) "No hay publicaciones aún" else "No hay reportes pendientes",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = TextGray
+                            )
+                            Text(
+                                text = if (uiState.selectedTab == 0) "Los usuarios aún no han publicado" else "¡Todo está bajo control!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextGray.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(postsToShow) { post ->
+                            AdminPostCard(
+                                mealPost = post,
+                                isReported = uiState.selectedTab == 1 || post.reportCount > 0,
+                                onApprove = if (post.reportCount > 0) { { viewModel.approveReportedPost(post.id) } } else null,
+                                onDelete = { reason -> viewModel.deletePost(post.id, reason) }
+                            )
+                        }
                     }
                 }
             }
@@ -195,9 +268,10 @@ fun AdminDashboardScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ReportedPostCard(
+fun AdminPostCard(
     mealPost: MealPost,
-    onApprove: () -> Unit,
+    isReported: Boolean = false,
+    onApprove: (() -> Unit)? = null,
     onDelete: (String) -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -210,29 +284,31 @@ fun ReportedPostCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Badge de reporte
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ErrorRed.copy(alpha = 0.1f))
-                    .padding(12.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // Badge de reporte solo si está reportado
+            if (isReported && mealPost.reportCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ErrorRed.copy(alpha = 0.1f))
+                        .padding(12.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Warning,
-                        contentDescription = null,
-                        tint = ErrorRed,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Reportado ${mealPost.reportCount} ${if (mealPost.reportCount == 1) "vez" else "veces"}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = ErrorRed,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = ErrorRed,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Reportado ${mealPost.reportCount} ${if (mealPost.reportCount == 1) "vez" else "veces"}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = ErrorRed,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
@@ -345,7 +421,7 @@ fun ReportedPostCard(
                 }
 
                 // Motivo del reporte
-                if (mealPost.lastReportReason.isNotBlank()) {
+                if (isReported && mealPost.lastReportReason.isNotBlank()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Card(
                         colors = CardDefaults.cardColors(
@@ -376,20 +452,22 @@ fun ReportedPostCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Aprobar (mantener visible)
-                    Button(
-                        onClick = onApprove,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Mantener")
+                    // Aprobar (mantener visible) - solo si está reportado
+                    if (onApprove != null) {
+                        Button(
+                            onClick = onApprove,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Mantener")
+                        }
                     }
 
                     // Borrar

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
@@ -100,6 +101,16 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Nombre del usuario (extraído del email o nombre real si existe)
+                        Text(
+                            text = user.name.ifBlank { user.email.substringBefore("@") },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = TextDark
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -118,6 +129,27 @@ fun ProfileScreen(
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
+
+                        // Ubicación del usuario
+                        if (user.location.city.isNotBlank()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    tint = TextGray,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = user.location.city,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = TextGray
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
 
                         Card(
                             colors = CardDefaults.cardColors(

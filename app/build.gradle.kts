@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.barriovivo"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.barriovivo"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -50,7 +50,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
 }
 
@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.icons.extended)
+    implementation(libs.androidx.compose.runtime.livedata)
 
     // Hilt
     implementation(libs.hilt.android)

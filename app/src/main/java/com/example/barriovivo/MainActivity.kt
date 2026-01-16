@@ -11,6 +11,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -98,16 +99,33 @@ class MainActivity : ComponentActivity() {
                             val homeState by homeViewModel.uiState.collectAsState()
                             val chatViewModel: ChatViewModel = hiltViewModel()
                             val totalUnreadCount by chatViewModel.totalUnreadCount.collectAsState()
+                            val notificationViewModel: com.example.barriovivo.ui.viewmodel.NotificationViewModel = hiltViewModel()
+                            val notificationState by notificationViewModel.uiState.collectAsState()
+
+                            // Observar el resultado de la pantalla de creación
+                            val newPostCreatedState = navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.getLiveData<Boolean>("new_post_created")
+                                ?.observeAsState()
+
+                            LaunchedEffect(newPostCreatedState?.value) {
+                                if (newPostCreatedState?.value == true) {
+                                    homeViewModel.refresh()
+                                    // Limpiar el estado para no refrescar de nuevo
+                                    navController.currentBackStackEntry?.savedStateHandle?.set("new_post_created", false)
+                                }
+                            }
 
                             // Cargar datos solo cuando haya usuario y una vez
                             LaunchedEffect(authState.currentUser) {
                                 authState.currentUser?.let { user ->
                                     homeViewModel.loadUserMealPosts(user.id)
-                                    val lat = user.location.latitude
-                                    val lon = user.location.longitude
-                                    if (lat != 0.0 || lon != 0.0) {
-                                        homeViewModel.loadNearbyMealPosts(lat, lon)
-                                    }
+                                    // Usar ubicación del usuario o Madrid por defecto
+                                    val lat = if (user.location.latitude != 0.0) user.location.latitude else 40.4168
+                                    val lon = if (user.location.longitude != 0.0) user.location.longitude else -3.7038
+                                    homeViewModel.loadNearbyMealPosts(lat, lon)
+                                    // Cargar notificaciones no leídas
+                                    notificationViewModel.loadUnreadNotifications(user.id)
                                 }
                             }
 
@@ -116,6 +134,7 @@ class MainActivity : ComponentActivity() {
                                 userMealPosts = homeState.userMealPosts,
                                 isLoading = homeState.isLoading,
                                 unreadChatCount = totalUnreadCount,
+                                unreadNotificationCount = notificationState.unreadCount,
                                 onCreateMealClick = { navController.navigate("create_meal") },
                                 onMealClick = { mealId ->
                                     navController.navigate("meal_detail/$mealId")
@@ -144,7 +163,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("create_meal") {
-                            CreateMealScreen(onClose = { navController.popBackStack() })
+                            CreateMealScreen(onClose = {
+                                // Indicar que se creó un nuevo post
+                                navController.previousBackStackEntry?.savedStateHandle?.set("new_post_created", true)
+                                navController.popBackStack()
+                            })
                         }
 
                         composable(
@@ -179,15 +202,19 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onReportClick = { reason ->
                                     authState.currentUser?.let { user ->
-                                        // El admin ID se obtiene del config - por ahora usar uno hardcodeado
-                                        mealDetailViewModel.reportMealPost(mealId, user.id, reason, "admin")
+                                        mealDetailViewModel.reportMealPost(mealId, user.id, reason)
                                     }
                                 }
                             )
                         }
 
                         composable("notifications") {
-                            NotificationScreen(onBack = { navController.popBackStack() })
+                            NotificationScreen(
+                                onBack = { navController.popBackStack() },
+                                onNotificationClick = { mealId ->
+                                    navController.navigate("meal_detail/$mealId")
+                                }
+                            )
                         }
 
                         composable("profile") {
@@ -238,7 +265,12 @@ class MainActivity : ComponentActivity() {
 
                         // Admin Notifications
                         composable("admin_notifications") {
-                            NotificationScreen(onBack = { navController.popBackStack() })
+                            NotificationScreen(
+                                onBack = { navController.popBackStack() },
+                                onNotificationClick = { mealId ->
+                                    navController.navigate("meal_detail/$mealId")
+                                }
+                            )
                         }
 
                         // Admin Profile Screen

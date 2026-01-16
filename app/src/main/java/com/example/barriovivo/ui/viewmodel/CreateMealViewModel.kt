@@ -39,31 +39,29 @@ class CreateMealViewModel @Inject constructor(
         expiryDate: LocalDate,
         location: Location
     ) {
+        // Reiniciar el estado de éxito para permitir nuevas publicaciones
+        _uiState.value = _uiState.value.copy(success = false, error = null, expiryDateError = null)
+
         // Validar que la fecha de caducidad no sea anterior a hoy
         if (expiryDate.isBefore(LocalDate.now())) {
-            _uiState.value = _uiState.value.copy(
-                expiryDateError = "La fecha de caducidad no puede ser anterior a hoy"
-            )
+            _uiState.value = CreateMealUiState(expiryDateError = "La fecha de caducidad no puede ser anterior a hoy")
             return
         }
 
         if (title.isBlank()) {
-            _uiState.value = _uiState.value.copy(
-                error = "El nombre de la comida no puede estar vacío"
-            )
+            _uiState.value = CreateMealUiState(error = "El nombre de la comida no puede estar vacío")
             return
         }
 
         // Validación: al menos una foto obligatoria
         if (photoUris.isEmpty() || photoUris.all { it.isBlank() }) {
-            _uiState.value = _uiState.value.copy(
-                error = "Es obligatorio añadir al menos una foto"
-            )
+            _uiState.value = CreateMealUiState(error = "Es obligatorio añadir al menos una foto")
             return
         }
 
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            // Indicar que la carga ha comenzado
+            _uiState.value = CreateMealUiState(isLoading = true)
 
             val result = mealPostRepository.createMealPost(
                 userId = userId,
@@ -75,21 +73,18 @@ class CreateMealViewModel @Inject constructor(
                 location = location
             )
 
-            result.onSuccess { mealPost ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = null,
-                    success = true,
-                    expiryDateError = null
-                )
-            }
-
-            result.onFailure { exception ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = exception.message ?: "Error al crear la comida"
-                )
-            }
+            // Actualizar el estado de la UI con el resultado
+            result.fold(
+                onSuccess = {
+                    _uiState.value = CreateMealUiState(isLoading = false, success = true)
+                },
+                onFailure = { exception ->
+                    _uiState.value = CreateMealUiState(
+                        isLoading = false,
+                        error = exception.message ?: "Error desconocido al crear la comida"
+                    )
+                }
+            )
         }
     }
 

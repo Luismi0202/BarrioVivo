@@ -122,6 +122,34 @@ class ChatRepository @Inject constructor(
         Result.failure(e)
     }
 
+    // Cerrar conversaciones del creador de un post
+    suspend fun closeConversationsByCreator(creatorUserId: String, mealPostId: String): Result<Unit> = try {
+        val conversation = conversationDao.getConversationByMealPostId(mealPostId)
+        if (conversation != null && conversation.creatorUserId == creatorUserId) {
+            conversationDao.closeConversation(conversation.id, LocalDateTime.now())
+        }
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    // Cerrar chats inactivos (más de 7 días sin actividad)
+    suspend fun closeInactiveConversations(): Result<Int> = try {
+        val sevenDaysAgo = LocalDateTime.now().minusDays(7)
+        var closedCount = 0
+        conversationDao.getAllActiveConversations().collect { conversations ->
+            conversations.forEach { conv ->
+                if (conv.lastMessageAt.isBefore(sevenDaysAgo) && conv.isActive) {
+                    conversationDao.closeConversation(conv.id, LocalDateTime.now())
+                    closedCount++
+                }
+            }
+        }
+        Result.success(closedCount)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     suspend fun getTotalUnreadCount(userId: String): Result<Int> = try {
         val conversations = conversationDao.getUserActiveConversations(userId)
         var totalUnread = 0

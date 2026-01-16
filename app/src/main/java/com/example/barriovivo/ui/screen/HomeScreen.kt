@@ -48,6 +48,7 @@ fun HomeScreen(
     userMealPosts: List<MealPost> = emptyList(),
     isLoading: Boolean = false,
     unreadChatCount: Int = 0,
+    unreadNotificationCount: Int = 0,
     onCreateMealClick: () -> Unit = {},
     onMealClick: (mealId: String) -> Unit = {},
     onNotificationsClick: () -> Unit = {},
@@ -101,12 +102,29 @@ fun HomeScreen(
                         }
                     }
 
-                    IconButton(onClick = onNotificationsClick) {
-                        Icon(
-                            Icons.Default.Notifications,
-                            contentDescription = "Notificaciones",
-                            tint = Color.White
-                        )
+                    // Botón Notificaciones con badge
+                    BadgedBox(
+                        badge = {
+                            if (unreadNotificationCount > 0) {
+                                Badge(
+                                    containerColor = ErrorRed,
+                                    contentColor = Color.White
+                                ) {
+                                    Text(
+                                        text = if (unreadNotificationCount > 99) "99+" else unreadNotificationCount.toString(),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        IconButton(onClick = onNotificationsClick) {
+                            Icon(
+                                Icons.Default.Notifications,
+                                contentDescription = "Notificaciones",
+                                tint = Color.White
+                            )
+                        }
                     }
                     IconButton(onClick = onProfileClick) {
                         Icon(

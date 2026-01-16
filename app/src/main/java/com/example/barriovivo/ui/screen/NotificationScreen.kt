@@ -1,6 +1,7 @@
 package com.example.barriovivo.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.barriovivo.domain.model.Notification
 import com.example.barriovivo.ui.theme.ErrorRed
@@ -30,18 +32,18 @@ import com.example.barriovivo.ui.viewmodel.NotificationViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNotificationClick: (String) -> Unit = {}
 ) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val authState by authViewModel.uiState.collectAsState()
-
     val viewModel: NotificationViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(authState.currentUser) {
-        authState.currentUser?.let { user ->
-            viewModel.loadNotifications(user.id)
-            viewModel.loadUnreadNotifications(user.id)
+        authState.currentUser?.let {
+            val userId = if (it.role == com.example.barriovivo.domain.model.UserRole.ADMIN) "admin_user_id" else it.id
+            viewModel.loadNotifications(userId)
         }
     }
 
@@ -51,42 +53,44 @@ fun NotificationScreen(
                 title = {
                     Text(
                         "Notificaciones",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Atrás"
+                            contentDescription = "Atrás",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GreenPrimary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = GreenPrimary
                 )
             )
         }
     ) { paddingValues ->
-        if (uiState.notifications.isEmpty()) {
+        if (uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = null,
-                        modifier = Modifier.size(80.dp),
-                        tint = TextGray.copy(alpha = 0.5f)
-                    )
+                CircularProgressIndicator(color = GreenPrimary)
+            }
+        } else if (uiState.notifications.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("📭", fontSize = 64.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         "No tienes notificaciones",
                         style = MaterialTheme.typography.titleMedium,
@@ -99,13 +103,20 @@ fun NotificationScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(uiState.notifications) { notif ->
-                    NotificationCard(
-                        notification = notif,
-                        onMarkRead = { viewModel.markAsRead(notif.id) }
+                items(uiState.notifications) { notification ->
+                    NotificationItem(
+                        notification = notification,
+                        onClick = {
+                            if (notification.type == com.example.barriovivo.domain.model.NotificationType.POST_REPORTED && notification.relatedPostId.isNotBlank()) {
+                                onNotificationClick(notification.relatedPostId)
+                            }
+                            // Marcar como leída si no lo está
+                            if (!notification.isRead) {
+                                viewModel.markAsRead(notification.id)
+                            }
+                        }
                     )
                 }
             }
@@ -114,38 +125,32 @@ fun NotificationScreen(
 }
 
 @Composable
-fun NotificationCard(
+fun NotificationItem(
     notification: Notification,
-    onMarkRead: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (notification.isRead) {
-                Color.White
-            } else {
-                GreenPrimary.copy(alpha = 0.05f)
-            }
+            containerColor = if (notification.isRead) Color.White else GreenPrimary.copy(alpha = 0.05f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (notification.isRead) 2.dp else 4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Indicador de no leído
             if (!notification.isRead) {
-                Icon(
-                    imageVector = Icons.Default.Circle,
-                    contentDescription = null,
-                    tint = GreenPrimary,
+                Box(
                     modifier = Modifier
-                        .size(12.dp)
-                        .padding(top = 4.dp)
+                        .size(10.dp)
+                        .background(GreenPrimary, CircleShape)
                 )
             }
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = notification.title,
@@ -159,24 +164,6 @@ fun NotificationCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
-
-                if (!notification.isRead) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextButton(
-                        onClick = onMarkRead,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = GreenPrimary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Marcar como leída")
-                    }
-                }
             }
         }
     }

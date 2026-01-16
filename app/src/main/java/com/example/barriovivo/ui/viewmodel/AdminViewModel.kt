@@ -33,6 +33,7 @@ class AdminViewModel @Inject constructor(
 
     init {
         loadReportedPosts()
+        loadAllPosts()
     }
 
     // Cargar posts reportados
@@ -131,7 +132,8 @@ class AdminViewModel @Inject constructor(
 
     fun setSelectedTab(tab: Int) {
         _uiState.value = _uiState.value.copy(selectedTab = tab)
-        if (tab == 0) loadReportedPosts() else loadAllPosts()
+        // Tab 0 = Todos los posts, Tab 1 = Reportados
+        if (tab == 0) loadAllPosts() else loadReportedPosts()
     }
 
     fun clearError() {
