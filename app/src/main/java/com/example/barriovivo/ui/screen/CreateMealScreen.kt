@@ -582,26 +582,25 @@ fun CreateMealScreen(
         }
     }
 
-    // Observar el estado de la UI para mostrar mensajes y navegar
-    LaunchedEffect(uiState) {
+    // Observar el estado de éxito para cerrar la pantalla
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            // Pequeña pausa para que se procese
+            kotlinx.coroutines.delay(300)
+            // Resetear estado y cerrar
+            viewModel.resetState()
+            onClose()
+        }
+    }
+
+    // Observar errores
+    LaunchedEffect(uiState.error, uiState.expiryDateError) {
         when {
-            uiState.success -> {
-                snackbarHostState.showSnackbar("¡Publicado con éxito! 🎉")
-                // Esperar un poco para que el usuario vea el mensaje
-                kotlinx.coroutines.delay(500)
-                // Resetear estado y cerrar
-                viewModel.resetState()
-                onClose()
-            }
             uiState.error != null -> {
                 localError = uiState.error
-                snackbarHostState.showSnackbar(uiState.error ?: "Error desconocido")
-                viewModel.clearError() // Limpiar el error después de mostrarlo
             }
             uiState.expiryDateError != null -> {
                 localError = uiState.expiryDateError
-                snackbarHostState.showSnackbar(uiState.expiryDateError ?: "Error en la fecha")
-                viewModel.clearError() // Limpiar el error después de mostrarlo
             }
         }
     }

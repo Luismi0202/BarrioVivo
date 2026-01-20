@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.barriovivo.domain.model.ChatConversation
 import com.example.barriovivo.domain.model.ChatMessage
-import com.example.barriovivo.ui.component.EmptyStateScreen
 import com.example.barriovivo.ui.theme.ErrorRed
 import com.example.barriovivo.ui.theme.GreenPrimary
 import com.example.barriovivo.ui.theme.GreenDark
@@ -49,8 +48,11 @@ fun ChatListScreen(
     val authState by authViewModel.uiState.collectAsState()
     val currentUserId = authState.currentUser?.id ?: ""
 
-    LaunchedEffect(Unit) {
-        viewModel.loadConversations()
+    // Cargar conversaciones cuando el usuario esté disponible
+    LaunchedEffect(currentUserId) {
+        if (currentUserId.isNotEmpty()) {
+            viewModel.loadConversations()
+        }
     }
 
     Scaffold(
@@ -157,6 +159,19 @@ fun ConversationItem(
 
     val isCreator = currentUserId == conversation.creatorUserId
 
+    // Obtener el nombre del otro participante
+    val otherUserName = if (isCreator) {
+        conversation.claimerUserName.ifEmpty { "Usuario" }
+    } else {
+        conversation.creatorUserName.ifEmpty { "Usuario" }
+    }
+
+    // Título a mostrar: nombre del otro usuario
+    val displayTitle = otherUserName
+
+    // Subtítulo: título de la comida
+    val mealTitle = conversation.mealPostTitle.ifEmpty { "Comida" }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,7 +192,7 @@ fun ConversationItem(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Avatar
+                // Avatar con inicial del nombre
                 Box(
                     modifier = Modifier
                         .size(50.dp)
@@ -186,41 +201,77 @@ fun ConversationItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isCreator) "🍽️" else "🛒",
-                        fontSize = 24.sp
+                        text = otherUserName.firstOrNull()?.uppercase() ?: "👤",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GreenPrimary
                     )
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = displayTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = if (unreadCount > 0) FontWeight.Bold else FontWeight.Medium,
+                            color = TextDark,
+                            maxLines = 1
+                        )
+                    }
                     Text(
-                        text = if (isCreator) "Alguien quiere tu comida" else "Comida reclamada",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (unreadCount > 0) FontWeight.Bold else FontWeight.Medium,
-                        color = TextDark
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Última actividad: ${formatDateTime(conversation.lastMessageAt)}",
+                        text = "🍽️ $mealTitle",
                         style = MaterialTheme.typography.bodySmall,
-                        color = TextGray
+                        color = GreenDark,
+                        maxLines = 1
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    // Mostrar último mensaje si existe
+                    if (conversation.lastMessage.isNotEmpty()) {
+                        Text(
+                            text = conversation.lastMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextGray,
+                            maxLines = 1
+                        )
+                    } else {
+                        Text(
+                            text = formatDateTime(conversation.lastMessageAt),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextGray
+                        )
+                    }
                 }
             }
 
-            // Badge de mensajes sin leer
-            if (unreadCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .background(GreenPrimary, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (unreadCount > 99) "99+" else unreadCount.toString(),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Hora del último mensaje
+                Text(
+                    text = formatDateTime(conversation.lastMessageAt),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextGray
+                )
+
+                // Badge de mensajes sin leer
+                if (unreadCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(GreenPrimary, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (unreadCount > 99) "99+" else unreadCount.toString(),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -236,6 +287,7 @@ fun ChatConversationScreen(
     onBack: () -> Unit
 ) {
     val messages by viewModel.currentMessages.collectAsState()
+    val currentConversation by viewModel.currentConversation.collectAsState()
     val authState by authViewModel.uiState.collectAsState()
     val currentUserId = authState.currentUser?.id ?: ""
 
@@ -243,6 +295,17 @@ fun ChatConversationScreen(
     val listState = rememberLazyListState()
     var showCloseDialog by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+
+    // Obtener el nombre del otro participante
+    val otherUserName = currentConversation?.let { conv ->
+        if (currentUserId == conv.creatorUserId) {
+            conv.claimerUserName.ifEmpty { "Usuario" }
+        } else {
+            conv.creatorUserName.ifEmpty { "Usuario" }
+        }
+    } ?: "Chat"
+
+    val mealTitle = currentConversation?.mealPostTitle ?: ""
 
     LaunchedEffect(conversationId) {
         viewModel.loadMessages(conversationId)
@@ -259,11 +322,21 @@ fun ChatConversationScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Chat",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Column {
+                        Text(
+                            otherUserName,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            fontSize = 18.sp
+                        )
+                        if (mealTitle.isNotEmpty()) {
+                            Text(
+                                "🍽️ $mealTitle",
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

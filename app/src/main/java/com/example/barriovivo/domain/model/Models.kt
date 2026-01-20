@@ -81,14 +81,18 @@ data class Admin(
 data class ChatConversation(
     val id: String = "",
     val mealPostId: String = "",
+    val mealPostTitle: String = "", // Título de la comida
     val creatorUserId: String = "", // Usuario que creó el post
+    val creatorUserName: String = "", // Nombre del creador
     val claimerUserId: String = "", // Usuario que reclamó la comida
+    val claimerUserName: String = "", // Nombre del reclamante
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val lastMessageAt: LocalDateTime = LocalDateTime.now(),
     val isActive: Boolean = true,
     val closedAt: LocalDateTime? = null,
     val unreadCountCreator: Int = 0, // Mensajes sin leer del creador
-    val unreadCountClaimer: Int = 0 // Mensajes sin leer del reclamante
+    val unreadCountClaimer: Int = 0, // Mensajes sin leer del reclamante
+    val lastMessage: String = "" // Último mensaje para preview
 )
 
 data class ChatMessage(

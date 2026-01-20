@@ -41,6 +41,7 @@ fun MealDetailScreen(
     isLoading: Boolean = false,
     isClaimLoading: Boolean = false,
     claimSuccess: Boolean = false,
+    conversationId: String? = null,
     error: String? = null,
     currentUserId: String = "",
     isReportLoading: Boolean = false,
@@ -48,7 +49,9 @@ fun MealDetailScreen(
     onBack: () -> Unit = {},
     onClaimClick: () -> Unit = {},
     onGoToChat: (String) -> Unit = {},
-    onReportClick: (reason: String) -> Unit = {}
+    onReportClick: (reason: String) -> Unit = {},
+    onResetClaimSuccess: () -> Unit = {},
+    onResetReportSuccess: () -> Unit = {}
 ) {
     var showClaimSuccessDialog by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -492,9 +495,12 @@ fun MealDetailScreen(
     }
 
     // Diálogo de éxito al reclamar
-    if (claimSuccess) {
+    if (showClaimSuccessDialog && claimSuccess) {
         AlertDialog(
-            onDismissRequest = { /* No se puede cerrar hasta que el usuario interactúe */ },
+            onDismissRequest = {
+                showClaimSuccessDialog = false
+                onResetClaimSuccess()
+            },
             icon = {
                 Text("🎉", fontSize = 48.sp)
             },
@@ -514,8 +520,12 @@ fun MealDetailScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        // El conversationId se obtiene del estado del ViewModel
-                        mealPost?.let { onGoToChat(it.id) }
+                        // Guardar el conversationId antes de resetear
+                        val chatId = conversationId
+                        showClaimSuccessDialog = false
+                        onResetClaimSuccess()
+                        // Navegar al chat
+                        chatId?.let { onGoToChat(it) }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
                 ) {
@@ -524,12 +534,16 @@ fun MealDetailScreen(
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text("Ir al chat")
                 }
             },
             dismissButton = {
-                TextButton(onClick = onBack) {
+                TextButton(onClick = {
+                    showClaimSuccessDialog = false
+                    onResetClaimSuccess()
+                    onBack()
+                }) {
                     Text("Volver")
                 }
             }

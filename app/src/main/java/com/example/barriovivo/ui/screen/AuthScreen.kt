@@ -192,12 +192,8 @@ fun AuthScreen(
             }
         }
 
-        // Mostrar errores en snackbar local
-        LaunchedEffect(error) {
-            if (!error.isNullOrEmpty()) {
-                snackbarHostState.showSnackbar(error)
-            }
-        }
+        // Mostrar errores en snackbar solo si es necesario (comentado para evitar duplicados)
+        // El error ya se muestra visualmente en la interfaz
     }
 }
 
@@ -212,6 +208,10 @@ fun LoginTab(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
 
+    // Validación de email
+    val isValidEmail = email.isEmpty() || android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    val showEmailError = email.isNotEmpty() && !isValidEmail
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "👋 ¡Bienvenido de nuevo!",
@@ -222,18 +222,31 @@ fun LoginTab(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        BarrioVivoTextField(
+        // Campo de email con validación
+        OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = "Correo electrónico",
-            keyboardType = KeyboardType.Email,
+            label = { Text("Correo electrónico") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
                     contentDescription = "Email",
-                    tint = GreenPrimary
+                    tint = if (showEmailError) ErrorRed else GreenPrimary
                 )
-            }
+            },
+            isError = showEmailError,
+            supportingText = if (showEmailError) {
+                { Text("Introduce un correo electrónico válido", color = ErrorRed) }
+            } else null,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = if (showEmailError) ErrorRed else GreenPrimary,
+                unfocusedBorderColor = if (showEmailError) ErrorRed else Color.LightGray,
+                errorBorderColor = ErrorRed
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))

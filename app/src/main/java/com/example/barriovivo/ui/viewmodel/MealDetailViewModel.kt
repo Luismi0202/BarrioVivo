@@ -87,8 +87,11 @@ class MealDetailViewModel @Inject constructor(
                 // Crear conversación de chat
                 val chatResult = chatRepository.createConversation(
                     mealPostId = postId,
+                    mealPostTitle = mealPost.title,
                     creatorUserId = mealPost.userId,
-                    claimerUserId = claimerId
+                    creatorUserName = mealPost.userName,
+                    claimerUserId = claimerId,
+                    claimerUserName = claimerName
                 )
 
                 chatResult.onSuccess { conversation ->
@@ -135,7 +138,11 @@ class MealDetailViewModel @Inject constructor(
     }
 
     fun clearClaimSuccess() {
-        _uiState.value = _uiState.value.copy(claimSuccess = false, conversationId = null)
+        _uiState.value = _uiState.value.copy(claimSuccess = false)
+    }
+
+    fun clearConversationId() {
+        _uiState.value = _uiState.value.copy(conversationId = null)
     }
 
     fun clearReportSuccess() {

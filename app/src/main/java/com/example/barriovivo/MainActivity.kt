@@ -187,6 +187,7 @@ class MainActivity : ComponentActivity() {
                                 isLoading = mealDetailState.isLoading,
                                 isClaimLoading = mealDetailState.isClaimLoading,
                                 claimSuccess = mealDetailState.claimSuccess,
+                                conversationId = mealDetailState.conversationId,
                                 error = mealDetailState.error,
                                 currentUserId = authState.currentUser?.id ?: "",
                                 isReportLoading = mealDetailState.isReportLoading,
@@ -198,13 +199,16 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onGoToChat = { conversationId ->
+                                    mealDetailViewModel.clearClaimSuccess()
                                     navController.navigate("chat_conversation/$conversationId")
                                 },
                                 onReportClick = { reason ->
                                     authState.currentUser?.let { user ->
                                         mealDetailViewModel.reportMealPost(mealId, user.id, reason)
                                     }
-                                }
+                                },
+                                onResetClaimSuccess = { mealDetailViewModel.clearClaimSuccess() },
+                                onResetReportSuccess = { mealDetailViewModel.clearReportSuccess() }
                             )
                         }
 

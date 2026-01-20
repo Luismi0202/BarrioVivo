@@ -112,8 +112,9 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Email,
@@ -121,6 +122,7 @@ fun ProfileScreen(
                                 tint = TextGray,
                                 modifier = Modifier.size(20.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = user.email,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -133,8 +135,9 @@ fun ProfileScreen(
                         // Ubicación del usuario
                         if (user.location.city.isNotBlank()) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.LocationOn,
@@ -142,6 +145,7 @@ fun ProfileScreen(
                                     tint = TextGray,
                                     modifier = Modifier.size(20.dp)
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = user.location.city,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -279,16 +283,34 @@ fun ChangePasswordDialog(
     var confirmNewPassword by remember { mutableStateOf("") }
     var isVisible by remember { mutableStateOf(false) }
 
+    // Validaciones
+    val isNewPasswordValid = newPassword.length >= 6
+    val doPasswordsMatch = newPassword == confirmNewPassword
+    val canSubmit = currentPassword.isNotBlank() &&
+                    newPassword.isNotBlank() &&
+                    confirmNewPassword.isNotBlank() &&
+                    isNewPasswordValid &&
+                    doPasswordsMatch
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
-                if (newPassword == confirmNewPassword) {
-                    onConfirm(currentPassword, newPassword)
-                }
-            }) { Text("Actualizar") }
+            TextButton(
+                onClick = {
+                    if (canSubmit) {
+                        onConfirm(currentPassword, newPassword)
+                    }
+                },
+                enabled = canSubmit
+            ) {
+                Text("Actualizar")
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
         title = { Text("Cambiar contraseña") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -306,6 +328,14 @@ fun ChangePasswordDialog(
                     isPasswordVisible = isVisible,
                     onTogglePasswordVisibility = { isVisible = !isVisible }
                 )
+                // Mostrar error si la nueva contraseña es muy corta
+                if (newPassword.isNotEmpty() && !isNewPasswordValid) {
+                    Text(
+                        text = "La contraseña debe tener al menos 6 caracteres",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 PasswordTextField(
                     value = confirmNewPassword,
                     onValueChange = { confirmNewPassword = it },
@@ -313,6 +343,14 @@ fun ChangePasswordDialog(
                     isPasswordVisible = isVisible,
                     onTogglePasswordVisibility = { isVisible = !isVisible }
                 )
+                // Mostrar error si las contraseñas no coinciden
+                if (confirmNewPassword.isNotEmpty() && !doPasswordsMatch) {
+                    Text(
+                        text = "Las contraseñas no coinciden",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     )

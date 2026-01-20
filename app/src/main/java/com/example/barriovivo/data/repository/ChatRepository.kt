@@ -19,20 +19,46 @@ class ChatRepository @Inject constructor(
 
     suspend fun createConversation(
         mealPostId: String,
+        mealPostTitle: String,
         creatorUserId: String,
-        claimerUserId: String
+        creatorUserName: String,
+        claimerUserId: String,
+        claimerUserName: String
     ): Result<ChatConversation> = try {
-        val conversationId = UUID.randomUUID().toString()
-        val conversation = ChatConversationEntity(
-            id = conversationId,
-            mealPostId = mealPostId,
-            creatorUserId = creatorUserId,
-            claimerUserId = claimerUserId,
-            createdAt = LocalDateTime.now(),
-            lastMessageAt = LocalDateTime.now()
-        )
-        conversationDao.insertConversation(conversation)
-        Result.success(conversation.toDomain())
+        // Verificar si ya existe una conversación para este post y reclamante
+        val existingConversation = conversationDao.getConversationByMealPostAndClaimer(mealPostId, claimerUserId)
+        if (existingConversation != null && existingConversation.isActive) {
+            Result.success(existingConversation.toDomain())
+        } else {
+            val conversationId = UUID.randomUUID().toString()
+            val conversation = ChatConversationEntity(
+                id = conversationId,
+                mealPostId = mealPostId,
+                mealPostTitle = mealPostTitle,
+                creatorUserId = creatorUserId,
+                creatorUserName = creatorUserName,
+                claimerUserId = claimerUserId,
+                claimerUserName = claimerUserName,
+                createdAt = LocalDateTime.now(),
+                lastMessageAt = LocalDateTime.now()
+            )
+            conversationDao.insertConversation(conversation)
+            Result.success(conversation.toDomain())
+        }
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getConversationByMealPostAndClaimer(mealPostId: String, claimerUserId: String): Result<ChatConversation?> = try {
+        val conversation = conversationDao.getConversationByMealPostAndClaimer(mealPostId, claimerUserId)
+        Result.success(conversation?.toDomain())
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    suspend fun getConversationById(conversationId: String): Result<ChatConversation?> = try {
+        val conversation = conversationDao.getConversationById(conversationId)
+        Result.success(conversation?.toDomain())
     } catch (e: Exception) {
         Result.failure(e)
     }
@@ -67,8 +93,8 @@ class ChatRepository @Inject constructor(
         )
         messageDao.insertMessage(message)
 
-        // Actualizar timestamp de última actividad
-        conversationDao.updateLastMessageAt(conversationId, LocalDateTime.now())
+        // Actualizar timestamp de última actividad y último mensaje
+        conversationDao.updateLastMessageInfo(conversationId, LocalDateTime.now(), messageText)
 
         // Actualizar contador de no leídos
         val conversation = conversationDao.getConversationById(conversationId)
@@ -171,14 +197,18 @@ class ChatRepository @Inject constructor(
         return ChatConversation(
             id = id,
             mealPostId = mealPostId,
+            mealPostTitle = mealPostTitle,
             creatorUserId = creatorUserId,
+            creatorUserName = creatorUserName,
             claimerUserId = claimerUserId,
+            claimerUserName = claimerUserName,
             createdAt = createdAt,
             lastMessageAt = lastMessageAt,
             isActive = isActive,
             closedAt = closedAt,
             unreadCountCreator = unreadCountCreator,
-            unreadCountClaimer = unreadCountClaimer
+            unreadCountClaimer = unreadCountClaimer,
+            lastMessage = lastMessage
         )
     }
 

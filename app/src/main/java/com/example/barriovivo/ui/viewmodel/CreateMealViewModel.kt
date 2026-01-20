@@ -39,6 +39,11 @@ class CreateMealViewModel @Inject constructor(
         expiryDate: LocalDate,
         location: Location
     ) {
+        // Evitar doble publicación si ya está en proceso
+        if (_uiState.value.isLoading) {
+            return
+        }
+
         // Reiniciar el estado de éxito para permitir nuevas publicaciones
         _uiState.value = _uiState.value.copy(success = false, error = null, expiryDateError = null)
 

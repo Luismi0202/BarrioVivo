@@ -72,14 +72,18 @@ data class ChatConversationEntity(
     @PrimaryKey
     val id: String,
     val mealPostId: String,
+    val mealPostTitle: String = "", // Título de la comida para mostrar en la UI
     val creatorUserId: String,
+    val creatorUserName: String = "", // Nombre del creador del post
     val claimerUserId: String,
+    val claimerUserName: String = "", // Nombre del reclamante
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val lastMessageAt: LocalDateTime = LocalDateTime.now(),
     val isActive: Boolean = true,
     val closedAt: LocalDateTime? = null,
     val unreadCountCreator: Int = 0,
-    val unreadCountClaimer: Int = 0
+    val unreadCountClaimer: Int = 0,
+    val lastMessage: String = "" // Último mensaje para preview
 )
 
 @Entity(tableName = "chat_messages")

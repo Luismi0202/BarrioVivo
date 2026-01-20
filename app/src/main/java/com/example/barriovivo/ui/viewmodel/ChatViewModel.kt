@@ -27,6 +27,9 @@ class ChatViewModel @Inject constructor(
     private val _currentMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val currentMessages: StateFlow<List<ChatMessage>> = _currentMessages.asStateFlow()
 
+    private val _currentConversation = MutableStateFlow<ChatConversation?>(null)
+    val currentConversation: StateFlow<ChatConversation?> = _currentConversation.asStateFlow()
+
     private val _totalUnreadCount = MutableStateFlow(0)
     val totalUnreadCount: StateFlow<Int> = _totalUnreadCount.asStateFlow()
 
@@ -62,6 +65,11 @@ class ChatViewModel @Inject constructor(
 
     fun loadMessages(conversationId: String) {
         viewModelScope.launch {
+            // Cargar la conversación para obtener info de los participantes
+            chatRepository.getConversationById(conversationId).onSuccess { conversation ->
+                _currentConversation.value = conversation
+            }
+
             chatRepository.getConversationMessages(conversationId).collect { messages ->
                 _currentMessages.value = messages
             }

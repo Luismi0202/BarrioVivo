@@ -123,6 +123,9 @@ interface ChatConversationDao {
     @Query("SELECT * FROM chat_conversations WHERE mealPostId = :mealPostId")
     suspend fun getConversationByMealPostId(mealPostId: String): com.example.barriovivo.data.database.entity.ChatConversationEntity?
 
+    @Query("SELECT * FROM chat_conversations WHERE mealPostId = :mealPostId AND claimerUserId = :claimerUserId")
+    suspend fun getConversationByMealPostAndClaimer(mealPostId: String, claimerUserId: String): com.example.barriovivo.data.database.entity.ChatConversationEntity?
+
     @Query("UPDATE chat_conversations SET isActive = 0, closedAt = :closedAt WHERE id = :conversationId")
     suspend fun closeConversation(conversationId: String, closedAt: java.time.LocalDateTime)
 
@@ -134,6 +137,9 @@ interface ChatConversationDao {
 
     @Query("UPDATE chat_conversations SET lastMessageAt = :timestamp WHERE id = :conversationId")
     suspend fun updateLastMessageAt(conversationId: String, timestamp: java.time.LocalDateTime)
+
+    @Query("UPDATE chat_conversations SET lastMessageAt = :timestamp, lastMessage = :lastMessage WHERE id = :conversationId")
+    suspend fun updateLastMessageInfo(conversationId: String, timestamp: java.time.LocalDateTime, lastMessage: String)
 
     @Update
     suspend fun updateConversation(conversation: com.example.barriovivo.data.database.entity.ChatConversationEntity)
