@@ -7,6 +7,8 @@ import com.example.barriovivo.data.repository.MealPostRepository
 import com.example.barriovivo.data.repository.UserRepository
 import com.example.barriovivo.domain.model.ChatConversation
 import com.example.barriovivo.domain.model.ChatMessage
+import com.example.barriovivo.domain.model.ChatMessageWithMedia
+import com.example.barriovivo.domain.model.MessageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,10 @@ class ChatViewModel @Inject constructor(
 
     private val _currentMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val currentMessages: StateFlow<List<ChatMessage>> = _currentMessages.asStateFlow()
+
+    // Mensajes con media (compatibilidad progresiva)
+    private val _currentMessagesWithMedia = MutableStateFlow<List<ChatMessageWithMedia>>(emptyList())
+    val currentMessagesWithMedia: StateFlow<List<ChatMessageWithMedia>> = _currentMessagesWithMedia.asStateFlow()
 
     private val _currentConversation = MutableStateFlow<ChatConversation?>(null)
     val currentConversation: StateFlow<ChatConversation?> = _currentConversation.asStateFlow()
@@ -70,8 +76,21 @@ class ChatViewModel @Inject constructor(
                 _currentConversation.value = conversation
             }
 
-            chatRepository.getConversationMessages(conversationId).collect { messages ->
-                _currentMessages.value = messages
+            // Suscribirse a mensajes con media
+            chatRepository.getConversationMessagesWithMedia(conversationId).collect { messages ->
+                _currentMessagesWithMedia.value = messages
+                // También actualizar la lista legacy para compatibilidad
+                _currentMessages.value = messages.map { msg ->
+                    ChatMessage(
+                        id = msg.id,
+                        conversationId = msg.conversationId,
+                        senderId = msg.senderId,
+                        senderName = msg.senderName,
+                        message = msg.message,
+                        sentAt = msg.sentAt,
+                        isRead = msg.isRead
+                    )
+                }
             }
         }
     }
@@ -89,6 +108,46 @@ class ChatViewModel @Inject constructor(
 
                 if (result.isFailure) {
                     _errorMessage.value = "Error al enviar mensaje"
+                }
+            }
+        }
+    }
+
+    fun sendImage(conversationId: String, imageUri: String, caption: String = "") {
+        viewModelScope.launch {
+            val currentUser = userRepository.getCurrentUser()
+            if (currentUser != null) {
+                val result = chatRepository.sendMediaMessage(
+                    conversationId = conversationId,
+                    senderId = currentUser.id,
+                    senderName = currentUser.email,
+                    mediaUri = imageUri,
+                    type = MessageType.IMAGE,
+                    caption = caption
+                )
+
+                if (result.isFailure) {
+                    _errorMessage.value = "Error al enviar imagen"
+                }
+            }
+        }
+    }
+
+    fun sendAudio(conversationId: String, audioUri: String, caption: String = "") {
+        viewModelScope.launch {
+            val currentUser = userRepository.getCurrentUser()
+            if (currentUser != null) {
+                val result = chatRepository.sendMediaMessage(
+                    conversationId = conversationId,
+                    senderId = currentUser.id,
+                    senderName = currentUser.email,
+                    mediaUri = audioUri,
+                    type = MessageType.AUDIO,
+                    caption = caption
+                )
+
+                if (result.isFailure) {
+                    _errorMessage.value = "Error al enviar audio"
                 }
             }
         }
@@ -118,4 +177,3 @@ class ChatViewModel @Inject constructor(
         _errorMessage.value = null
     }
 }
-

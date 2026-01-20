@@ -105,3 +105,22 @@ data class ChatMessage(
     val isRead: Boolean = false
 )
 
+// Tipo de mensaje para soportar texto, imagen y audio
+enum class MessageType {
+    TEXT,
+    IMAGE,
+    AUDIO
+}
+
+// Extender ChatMessage para soportar mediaUri y tipo
+data class ChatMessageWithMedia(
+    val id: String = "",
+    val conversationId: String = "",
+    val senderId: String = "",
+    val senderName: String = "",
+    val message: String = "",
+    val mediaUri: String? = null, // URI a imagen o audio
+    val type: MessageType = MessageType.TEXT,
+    val sentAt: LocalDateTime = LocalDateTime.now(),
+    val isRead: Boolean = false
+)

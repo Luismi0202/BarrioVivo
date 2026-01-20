@@ -94,7 +94,8 @@ data class ChatMessageEntity(
     val senderId: String,
     val senderName: String,
     val message: String,
+    val mediaUri: String? = null,
+    val messageType: String = "TEXT",
     val sentAt: LocalDateTime = LocalDateTime.now(),
     val isRead: Boolean = false
 )
-

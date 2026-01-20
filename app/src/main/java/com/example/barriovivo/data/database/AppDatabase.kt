@@ -19,7 +19,7 @@ import com.example.barriovivo.data.database.entity.*
         ChatConversationEntity::class,
         ChatMessageEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class)
@@ -105,6 +105,15 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Añadir columnas para soportar media en mensajes de chat
+                database.execSQL("ALTER TABLE chat_messages ADD COLUMN mediaUri TEXT")
+                // messageType debe tener un valor por defecto
+                database.execSQL("ALTER TABLE chat_messages ADD COLUMN messageType TEXT NOT NULL DEFAULT 'TEXT'")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -112,7 +121,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "barriovivo_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration() // Solo para desarrollo
                     .build()
                 INSTANCE = instance
@@ -121,4 +130,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

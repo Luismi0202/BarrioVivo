@@ -6,6 +6,8 @@ import com.example.barriovivo.data.database.entity.ChatConversationEntity
 import com.example.barriovivo.data.database.entity.ChatMessageEntity
 import com.example.barriovivo.domain.model.ChatConversation
 import com.example.barriovivo.domain.model.ChatMessage
+import com.example.barriovivo.domain.model.ChatMessageWithMedia
+import com.example.barriovivo.domain.model.MessageType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
@@ -89,6 +91,8 @@ class ChatRepository @Inject constructor(
             senderId = senderId,
             senderName = senderName,
             message = messageText,
+            mediaUri = null,
+            messageType = MessageType.TEXT.name,
             sentAt = LocalDateTime.now()
         )
         messageDao.insertMessage(message)
@@ -117,9 +121,67 @@ class ChatRepository @Inject constructor(
         Result.failure(e)
     }
 
+    // Enviar mensaje con media (imagen o audio)
+    suspend fun sendMediaMessage(
+        conversationId: String,
+        senderId: String,
+        senderName: String,
+        mediaUri: String,
+        type: MessageType,
+        caption: String = ""
+    ): Result<ChatMessageWithMedia> = try {
+        val messageId = UUID.randomUUID().toString()
+        val message = ChatMessageEntity(
+            id = messageId,
+            conversationId = conversationId,
+            senderId = senderId,
+            senderName = senderName,
+            message = caption,
+            mediaUri = mediaUri,
+            messageType = type.name,
+            sentAt = LocalDateTime.now()
+        )
+        messageDao.insertMessage(message)
+
+        // Actualizar timestamp y último mensaje (mostrar tipo)
+        val preview = when (type) {
+            MessageType.IMAGE -> "📷 Foto"
+            MessageType.AUDIO -> "🎤 Audio"
+            else -> caption
+        }
+        conversationDao.updateLastMessageInfo(conversationId, LocalDateTime.now(), preview)
+
+        // Actualizar contador de no leídos
+        val conversation = conversationDao.getConversationById(conversationId)
+        if (conversation != null) {
+            if (senderId == conversation.creatorUserId) {
+                conversationDao.updateUnreadCountClaimer(
+                    conversationId,
+                    conversation.unreadCountClaimer + 1
+                )
+            } else {
+                conversationDao.updateUnreadCountCreator(
+                    conversationId,
+                    conversation.unreadCountCreator + 1
+                )
+            }
+        }
+
+        Result.success(message.toDomainWithMedia())
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     fun getConversationMessages(conversationId: String): Flow<List<ChatMessage>> {
         return messageDao.getConversationMessages(conversationId).map { messages ->
             messages.map { it.toDomain() }
+        }
+    }
+
+    // Obtener mensajes con información de media
+    fun getConversationMessagesWithMedia(conversationId: String): Flow<List<ChatMessageWithMedia>> {
+        return messageDao.getConversationMessages(conversationId).map { messages ->
+            messages.map { it.toDomainWithMedia() }
         }
     }
 
@@ -223,5 +285,19 @@ class ChatRepository @Inject constructor(
             isRead = isRead
         )
     }
-}
 
+    private fun ChatMessageEntity.toDomainWithMedia(): ChatMessageWithMedia {
+        val type = try { MessageType.valueOf(messageType) } catch (e: Exception) { MessageType.TEXT }
+        return ChatMessageWithMedia(
+            id = id,
+            conversationId = conversationId,
+            senderId = senderId,
+            senderName = senderName,
+            message = message,
+            mediaUri = mediaUri,
+            type = type,
+            sentAt = sentAt,
+            isRead = isRead
+        )
+    }
+}
