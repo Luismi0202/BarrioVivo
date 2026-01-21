@@ -42,7 +42,7 @@
 
 ### RA2.c - Interacción por voz
 
-
+    
 ### RA2.d - Interacción por gesto
 
 
