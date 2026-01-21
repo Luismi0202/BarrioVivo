@@ -16,12 +16,28 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+/**
+ * Repositorio para gestion de publicaciones de comida.
+ *
+ * Maneja el ciclo de vida completo de las publicaciones:
+ * - Creacion: Las publicaciones se crean con estado ACTIVE directamente
+ * - Consulta: Filtrado por ubicacion usando formula Haversine
+ * - Reclamacion: Un usuario puede reclamar comida de otro
+ * - Reportes: Sistema de reportes con contadores
+ * - Moderacion: Eliminacion por administradores
+ *
+ * El filtrado por ubicacion calcula la distancia entre coordenadas
+ * usando la formula de Haversine para distancias en una esfera.
+ * Radio por defecto: 10 km
+ *
+ * @property mealPostDao DAO para operaciones de base de datos
+ */
 class MealPostRepository @Inject constructor(
     private val mealPostDao: MealPostDao
 ) {
     companion object {
         private const val EARTH_RADIUS_KM = 6371.0
-        private const val DEFAULT_RADIUS_KM = 10.0 // Radio por defecto de 10km
+        private const val DEFAULT_RADIUS_KM = 10.0
     }
 
     // Crear post - ahora se publica directamente como ACTIVE

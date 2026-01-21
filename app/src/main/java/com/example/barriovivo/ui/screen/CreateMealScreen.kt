@@ -582,10 +582,10 @@ fun CreateMealScreen(
         }
     }
 
-    // Observar el estado de éxito para cerrar la pantalla
-    LaunchedEffect(uiState.success) {
-        if (uiState.success) {
-            // Pequeña pausa para que se procese
+    // Observar el estado de exito para cerrar la pantalla
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            // Pequena pausa para que se procese
             kotlinx.coroutines.delay(300)
             // Resetear estado y cerrar
             viewModel.resetState()
@@ -594,14 +594,9 @@ fun CreateMealScreen(
     }
 
     // Observar errores
-    LaunchedEffect(uiState.error, uiState.expiryDateError) {
-        when {
-            uiState.error != null -> {
-                localError = uiState.error
-            }
-            uiState.expiryDateError != null -> {
-                localError = uiState.expiryDateError
-            }
+    LaunchedEffect(uiState.error) {
+        if (uiState.error != null) {
+            localError = uiState.error
         }
     }
 

@@ -10,6 +10,31 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.barriovivo.data.database.dao.*
 import com.example.barriovivo.data.database.entity.*
 
+/**
+ * Base de datos principal de la aplicacion BarrioVivo.
+ *
+ * Utiliza Room como capa de abstraccion sobre SQLite.
+ * Implementa el patron Singleton para garantizar una unica instancia.
+ *
+ * Entidades gestionadas:
+ * - UserEntity: Usuarios registrados
+ * - MealPostEntity: Publicaciones de comida
+ * - NotificationEntity: Notificaciones del sistema
+ * - AdminEntity: Configuracion de administradores
+ * - ChatConversationEntity: Conversaciones de chat
+ * - ChatMessageEntity: Mensajes individuales
+ *
+ * Historial de versiones:
+ * - v1: Esquema inicial
+ * - v2: Soporte para chat y reclamaciones
+ * - v3: Sistema de reportes
+ * - v4: Campo nombre en usuarios
+ * - v5: Mejoras en conversaciones (nombres y preview)
+ * - v6: Soporte multimedia en mensajes
+ * - v7: Correccion de compatibilidad de esquema
+ *
+ * @see DateTimeConverters para conversion de tipos de fecha
+ */
 @Database(
     entities = [
         UserEntity::class,
@@ -19,7 +44,7 @@ import com.example.barriovivo.data.database.entity.*
         ChatConversationEntity::class,
         ChatMessageEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class)
@@ -114,6 +139,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Migración vacía para resolver incompatibilidad de hash
+                // El esquema no cambió, solo necesitamos actualizar la versión
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -121,7 +153,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "barriovivo_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .fallbackToDestructiveMigration() // Solo para desarrollo
                     .build()
                 INSTANCE = instance

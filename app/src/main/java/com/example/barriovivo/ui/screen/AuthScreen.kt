@@ -9,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
@@ -38,17 +40,104 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.barriovivo.ui.viewmodel.AuthViewModel
 
 val LOCATIONS = listOf(
-    "Madrid",
+    // Ciudades principales de España ordenadas alfabéticamente
+    "A Coruña",
+    "Albacete",
+    "Alcalá de Henares",
+    "Alcobendas",
+    "Alcorcón",
+    "Algeciras",
+    "Alicante",
+    "Almería",
+    "Aranjuez",
+    "Arrecife",
+    "Ávila",
+    "Avilés",
+    "Badajoz",
+    "Badalona",
     "Barcelona",
-    "Valencia",
-    "Sevilla",
     "Bilbao",
-    "Zaragoza",
+    "Burgos",
+    "Cáceres",
+    "Cádiz",
+    "Cartagena",
+    "Castellón de la Plana",
+    "Ceuta",
+    "Ciudad Real",
+    "Córdoba",
+    "Cuenca",
+    "Dos Hermanas",
+    "Elche",
+    "El Puerto de Santa María",
+    "Ferrol",
+    "Fuengirola",
+    "Fuenlabrada",
+    "Getafe",
+    "Gijón",
+    "Girona",
+    "Granada",
+    "Guadalajara",
+    "Huelva",
+    "Huesca",
+    "Ibiza",
+    "Jaén",
+    "Jerez de la Frontera",
+    "Las Palmas de Gran Canaria",
+    "Las Rozas de Madrid",
+    "Leganés",
+    "León",
+    "Lérida",
+    "Logroño",
+    "Lorca",
+    "Lugo",
+    "Madrid",
     "Málaga",
+    "Marbella",
+    "Mataró",
+    "Melilla",
+    "Mérida",
+    "Mollet del Vallès",
+    "Móstoles",
     "Murcia",
+    "Orense",
+    "Oviedo",
+    "Palencia",
     "Palma de Mallorca",
-    "Las Palmas",
-    "Otro"
+    "Pamplona",
+    "Parla",
+    "Pontevedra",
+    "Pozuelo de Alarcón",
+    "Reus",
+    "Rivas-Vaciamadrid",
+    "Sabadell",
+    "Salamanca",
+    "San Cristóbal de La Laguna",
+    "San Fernando",
+    "San Sebastián",
+    "Santa Coloma de Gramenet",
+    "Santa Cruz de Tenerife",
+    "Santander",
+    "Santiago de Compostela",
+    "Segovia",
+    "Sevilla",
+    "Soria",
+    "Talavera de la Reina",
+    "Tarragona",
+    "Telde",
+    "Terrassa",
+    "Teruel",
+    "Toledo",
+    "Torrejón de Ardoz",
+    "Torremolinos",
+    "Torrent",
+    "Valencia",
+    "Valladolid",
+    "Vélez-Málaga",
+    "Vigo",
+    "Vitoria-Gasteiz",
+    "Zamora",
+    "Zaragoza",
+    "✏️ Introducir manualmente"
 )
 
 @Composable
@@ -379,17 +468,104 @@ fun RegisterTab(
     var zipCode by remember { mutableStateOf("") }
 
     val locationCoordinates = mapOf(
-        "Madrid" to Pair(40.4168, -3.7038),
+        // Coordenadas de todas las ciudades de España
+        "A Coruña" to Pair(43.3623, -8.4115),
+        "Albacete" to Pair(38.9942, -1.8585),
+        "Alcalá de Henares" to Pair(40.4818, -3.3635),
+        "Alcobendas" to Pair(40.5475, -3.6420),
+        "Alcorcón" to Pair(40.3456, -3.8248),
+        "Algeciras" to Pair(36.1408, -5.4536),
+        "Alicante" to Pair(38.3452, -0.4815),
+        "Almería" to Pair(36.8340, -2.4637),
+        "Aranjuez" to Pair(40.0332, -3.6028),
+        "Arrecife" to Pair(28.9630, -13.5477),
+        "Ávila" to Pair(40.6566, -4.6815),
+        "Avilés" to Pair(43.5547, -5.9248),
+        "Badajoz" to Pair(38.8794, -6.9707),
+        "Badalona" to Pair(41.4501, 2.2474),
         "Barcelona" to Pair(41.3851, 2.1734),
-        "Valencia" to Pair(39.4699, -0.3763),
-        "Sevilla" to Pair(37.3891, -5.9845),
         "Bilbao" to Pair(43.2630, -2.9350),
-        "Zaragoza" to Pair(41.6488, -0.8891),
+        "Burgos" to Pair(42.3439, -3.6969),
+        "Cáceres" to Pair(39.4753, -6.3724),
+        "Cádiz" to Pair(36.5271, -6.2886),
+        "Cartagena" to Pair(37.6057, -0.9918),
+        "Castellón de la Plana" to Pair(39.9864, -0.0513),
+        "Ceuta" to Pair(35.8893, -5.3198),
+        "Ciudad Real" to Pair(38.9848, -3.9274),
+        "Córdoba" to Pair(37.8882, -4.7794),
+        "Cuenca" to Pair(40.0704, -2.1374),
+        "Dos Hermanas" to Pair(37.2838, -5.9219),
+        "Elche" to Pair(38.2669, -0.6983),
+        "El Puerto de Santa María" to Pair(36.5939, -6.2326),
+        "Ferrol" to Pair(43.4843, -8.2328),
+        "Fuengirola" to Pair(36.5397, -4.6247),
+        "Fuenlabrada" to Pair(40.2839, -3.8000),
+        "Getafe" to Pair(40.3057, -3.7326),
+        "Gijón" to Pair(43.5453, -5.6635),
+        "Girona" to Pair(41.9794, 2.8214),
+        "Granada" to Pair(37.1773, -3.5986),
+        "Guadalajara" to Pair(40.6337, -3.1667),
+        "Huelva" to Pair(37.2614, -6.9447),
+        "Huesca" to Pair(42.1401, -0.4089),
+        "Ibiza" to Pair(38.9067, 1.4206),
+        "Jaén" to Pair(37.7796, -3.7849),
+        "Jerez de la Frontera" to Pair(36.6866, -6.1370),
+        "Las Palmas de Gran Canaria" to Pair(28.1235, -15.4363),
+        "Las Rozas de Madrid" to Pair(40.4929, -3.8737),
+        "Leganés" to Pair(40.3281, -3.7644),
+        "León" to Pair(42.5987, -5.5671),
+        "Lérida" to Pair(41.6176, 0.6200),
+        "Logroño" to Pair(42.4627, -2.4449),
+        "Lorca" to Pair(37.6714, -1.7011),
+        "Lugo" to Pair(43.0097, -7.5568),
+        "Madrid" to Pair(40.4168, -3.7038),
         "Málaga" to Pair(36.7213, -4.4214),
+        "Marbella" to Pair(36.5100, -4.8826),
+        "Mataró" to Pair(41.5381, 2.4445),
+        "Melilla" to Pair(35.2923, -2.9381),
+        "Mérida" to Pair(38.9160, -6.3436),
+        "Mollet del Vallès" to Pair(41.5391, 2.2143),
+        "Móstoles" to Pair(40.3223, -3.8649),
         "Murcia" to Pair(37.9922, -1.1307),
+        "Orense" to Pair(42.3364, -7.8638),
+        "Oviedo" to Pair(43.3619, -5.8494),
+        "Palencia" to Pair(42.0096, -4.5288),
         "Palma de Mallorca" to Pair(39.5696, 2.6502),
-        "Las Palmas" to Pair(28.1235, -15.4363),
-        "Otro" to Pair(0.0, 0.0)
+        "Pamplona" to Pair(42.8125, -1.6458),
+        "Parla" to Pair(40.2360, -3.7676),
+        "Pontevedra" to Pair(42.4310, -8.6444),
+        "Pozuelo de Alarcón" to Pair(40.4353, -3.8145),
+        "Reus" to Pair(41.1561, 1.1069),
+        "Rivas-Vaciamadrid" to Pair(40.3520, -3.5416),
+        "Sabadell" to Pair(41.5486, 2.1075),
+        "Salamanca" to Pair(40.9701, -5.6635),
+        "San Cristóbal de La Laguna" to Pair(28.4853, -16.3156),
+        "San Fernando" to Pair(36.4646, -6.1996),
+        "San Sebastián" to Pair(43.3183, -1.9812),
+        "Santa Coloma de Gramenet" to Pair(41.4517, 2.2080),
+        "Santa Cruz de Tenerife" to Pair(28.4636, -16.2518),
+        "Santander" to Pair(43.4623, -3.8100),
+        "Santiago de Compostela" to Pair(42.8782, -8.5448),
+        "Segovia" to Pair(40.9429, -4.1088),
+        "Sevilla" to Pair(37.3891, -5.9845),
+        "Soria" to Pair(41.7636, -2.4649),
+        "Talavera de la Reina" to Pair(39.9635, -4.8309),
+        "Tarragona" to Pair(41.1189, 1.2445),
+        "Telde" to Pair(27.9924, -15.4198),
+        "Terrassa" to Pair(41.5630, 2.0089),
+        "Teruel" to Pair(40.3456, -1.1065),
+        "Toledo" to Pair(39.8628, -4.0273),
+        "Torrejón de Ardoz" to Pair(40.4565, -3.4694),
+        "Torremolinos" to Pair(36.6218, -4.4998),
+        "Torrent" to Pair(39.4370, -0.4653),
+        "Valencia" to Pair(39.4699, -0.3763),
+        "Valladolid" to Pair(41.6523, -4.7245),
+        "Vélez-Málaga" to Pair(36.7839, -4.1007),
+        "Vigo" to Pair(42.2328, -8.7226),
+        "Vitoria-Gasteiz" to Pair(42.8467, -2.6726),
+        "Zamora" to Pair(41.5034, -5.7467),
+        "Zaragoza" to Pair(41.6488, -0.8891),
+        "✏️ Introducir manualmente" to Pair(0.0, 0.0)
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -504,6 +680,20 @@ fun LocationSelector(
     onLocationSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showManualInput by remember { mutableStateOf(false) }
+    var manualCity by remember { mutableStateOf("") }
+
+    // Filtrar ciudades según la búsqueda
+    val filteredLocations = remember(searchQuery) {
+        if (searchQuery.isBlank()) {
+            locations
+        } else {
+            locations.filter {
+                it.lowercase().contains(searchQuery.lowercase())
+            }
+        }
+    }
 
     Column {
         Text(
@@ -513,68 +703,160 @@ fun LocationSelector(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
+        if (showManualInput) {
+            // Campo para introducir ciudad manualmente
             OutlinedTextField(
-                value = if (selectedLocation.isBlank()) "Selecciona tu ciudad" else selectedLocation,
-                onValueChange = {},
-                readOnly = true,
+                value = manualCity,
+                onValueChange = {
+                    manualCity = it
+                    onLocationSelected(it)
+                },
+                label = { Text("Escribe tu ciudad") },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Ubicación",
-                        tint = if (selectedLocation.isBlank()) TextGray else GreenPrimary
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = GreenPrimary
                     )
                 },
                 trailingIcon = {
-                    IconButton(onClick = { expanded = !expanded }) {
+                    IconButton(onClick = {
+                        showManualInput = false
+                        manualCity = ""
+                        onLocationSelected("")
+                    }) {
                         Icon(
-                            imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                            contentDescription = if (expanded) "Cerrar" else "Abrir",
-                            tint = GreenPrimary
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver a la lista",
+                            tint = TextGray
                         )
                     }
                 },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = GreenPrimary,
                     unfocusedBorderColor = Color.LightGray
-                )
+                ),
+                singleLine = true
             )
 
-            ExposedDropdownMenu(
+            Text(
+                text = "💡 Escribe el nombre de tu ciudad y pulsa en el botón para volver a la lista",
+                style = MaterialTheme.typography.bodySmall,
+                color = TextGray.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        } else {
+            ExposedDropdownMenuBox(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onExpandedChange = { expanded = !expanded }
             ) {
-                locations.forEach { location ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                location,
-                                fontWeight = if (location == selectedLocation) FontWeight.Bold else FontWeight.Normal,
-                                color = if (location == selectedLocation) GreenPrimary else TextGray
+                OutlinedTextField(
+                    value = if (selectedLocation.isBlank()) "Selecciona tu ciudad" else selectedLocation,
+                    onValueChange = {},
+                    readOnly = true,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Ubicación",
+                            tint = if (selectedLocation.isBlank()) TextGray else GreenPrimary
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { expanded = !expanded }) {
+                            Icon(
+                                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                contentDescription = if (expanded) "Cerrar" else "Abrir",
+                                tint = GreenPrimary
                             )
-                        },
-                        onClick = {
-                            onLocationSelected(location)
-                            expanded = false
-                        },
-                        leadingIcon = {
-                            if (location == selectedLocation) {
+                        }
+                    },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = GreenPrimary,
+                        unfocusedBorderColor = Color.LightGray
+                    )
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = {
+                        expanded = false
+                        searchQuery = ""
+                    },
+                    modifier = Modifier.heightIn(max = 350.dp)
+                ) {
+                    // Campo de búsqueda dentro del dropdown
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("🔍 Buscar ciudad...", color = TextGray) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f)
+                        ),
+                        singleLine = true
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Lista de ciudades filtradas
+                    filteredLocations.forEach { location ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    location,
+                                    fontWeight = if (location == selectedLocation) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (location == selectedLocation) GreenPrimary else TextGray
+                                )
+                            },
+                            onClick = {
+                                if (location == "✏️ Introducir manualmente") {
+                                    showManualInput = true
+                                    expanded = false
+                                    searchQuery = ""
+                                } else {
+                                    onLocationSelected(location)
+                                    expanded = false
+                                    searchQuery = ""
+                                }
+                            },
+                            leadingIcon = {
                                 Icon(
-                                    Icons.Default.LocationOn,
+                                    imageVector = if (location == "✏️ Introducir manualmente") Icons.Default.Edit else Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = GreenPrimary,
+                                    tint = if (location == selectedLocation) GreenPrimary else TextGray.copy(alpha = 0.5f),
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
-                        }
-                    )
+                        )
+                    }
+
+                    // Mensaje si no hay resultados
+                    if (filteredLocations.isEmpty()) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "No se encontraron ciudades. Prueba '✏️ Introducir manualmente'",
+                                    color = TextGray.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            },
+                            onClick = {
+                                showManualInput = true
+                                expanded = false
+                                searchQuery = ""
+                            }
+                        )
+                    }
                 }
             }
         }

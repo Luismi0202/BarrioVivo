@@ -1,11 +1,11 @@
 package com.example.barriovivo.ui.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.barriovivo.data.repository.MealPostRepository
-import com.example.barriovivo.data.repository.NotificationRepository
+import com.example.barriovivo.data.repository.UserRepository
 import com.example.barriovivo.domain.model.Location
-import com.example.barriovivo.domain.model.MealPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,17 +14,37 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
+/**
+ * Estado de la UI para la pantalla de creacion de publicacion.
+ *
+ * @property isLoading Indica operacion en progreso
+ * @property isSuccess Creacion exitosa
+ * @property error Mensaje de error
+ */
 data class CreateMealUiState(
     val isLoading: Boolean = false,
-    val error: String? = null,
-    val success: Boolean = false,
-    val expiryDateError: String? = null
+    val isSuccess: Boolean = false,
+    val error: String? = null
 )
 
+/**
+ * ViewModel para la creacion de publicaciones de comida.
+ *
+ * Gestiona el proceso de crear una nueva publicacion:
+ * - Validacion de campos requeridos
+ * - Obtencion automatica de ubicacion del usuario
+ * - Almacenamiento de URIs de fotos
+ *
+ * La publicacion se crea con estado ACTIVE directamente,
+ * sin necesidad de aprobacion previa.
+ *
+ * @property mealPostRepository Repositorio de publicaciones
+ * @property userRepository Repositorio para obtener datos del usuario
+ */
 @HiltViewModel
 class CreateMealViewModel @Inject constructor(
     private val mealPostRepository: MealPostRepository,
-    private val notificationRepository: NotificationRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateMealUiState())
@@ -45,11 +65,11 @@ class CreateMealViewModel @Inject constructor(
         }
 
         // Reiniciar el estado de éxito para permitir nuevas publicaciones
-        _uiState.value = _uiState.value.copy(success = false, error = null, expiryDateError = null)
+        _uiState.value = _uiState.value.copy(isSuccess = false, error = null)
 
         // Validar que la fecha de caducidad no sea anterior a hoy
         if (expiryDate.isBefore(LocalDate.now())) {
-            _uiState.value = CreateMealUiState(expiryDateError = "La fecha de caducidad no puede ser anterior a hoy")
+            _uiState.value = CreateMealUiState(error = "La fecha de caducidad no puede ser anterior a hoy")
             return
         }
 
@@ -81,7 +101,7 @@ class CreateMealViewModel @Inject constructor(
             // Actualizar el estado de la UI con el resultado
             result.fold(
                 onSuccess = {
-                    _uiState.value = CreateMealUiState(isLoading = false, success = true)
+                    _uiState.value = CreateMealUiState(isLoading = false, isSuccess = true)
                 },
                 onFailure = { exception ->
                     _uiState.value = CreateMealUiState(
@@ -95,8 +115,7 @@ class CreateMealViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(
-            error = null,
-            expiryDateError = null
+            error = null
         )
     }
 

@@ -13,6 +13,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Estado de la UI para el panel de administracion.
+ *
+ * @property reportedPosts Publicaciones reportadas pendientes de revision
+ * @property allPosts Todas las publicaciones del sistema
+ * @property isLoading Indica carga en progreso
+ * @property error Mensaje de error
+ * @property successMessage Mensaje de exito
+ * @property selectedTab Tab seleccionada (0=Reportados, 1=Todos)
+ */
 data class AdminUiState(
     val reportedPosts: List<MealPost> = emptyList(),
     val allPosts: List<MealPost> = emptyList(),
@@ -22,6 +32,18 @@ data class AdminUiState(
     val selectedTab: Int = 0 // 0 = Reportados, 1 = Todos
 )
 
+/**
+ * ViewModel para el panel de administracion.
+ *
+ * Funcionalidades de moderacion:
+ * - Ver publicaciones reportadas por usuarios
+ * - Ver todas las publicaciones del sistema
+ * - Aprobar publicacion reportada (limpia los reportes)
+ * - Eliminar publicacion (notifica al autor)
+ *
+ * @property mealPostRepository Repositorio de publicaciones
+ * @property notificationRepository Repositorio para crear notificaciones
+ */
 @HiltViewModel
 class AdminViewModel @Inject constructor(
     private val mealPostRepository: MealPostRepository,
@@ -144,4 +166,3 @@ class AdminViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(successMessage = null)
     }
 }
-

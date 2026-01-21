@@ -16,6 +16,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel para gestion del sistema de chat.
+ *
+ * Funcionalidades principales:
+ * - Carga de conversaciones del usuario
+ * - Carga de mensajes por conversacion
+ * - Envio de mensajes de texto y multimedia
+ * - Control de mensajes no leidos
+ * - Marcado automatico como leido al abrir conversacion
+ *
+ * @property chatRepository Repositorio para operaciones de chat
+ * @property userRepository Repositorio para obtener usuario actual
+ * @property mealPostRepository Repositorio para datos de publicaciones
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
@@ -29,7 +43,6 @@ class ChatViewModel @Inject constructor(
     private val _currentMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val currentMessages: StateFlow<List<ChatMessage>> = _currentMessages.asStateFlow()
 
-    // Mensajes con media (compatibilidad progresiva)
     private val _currentMessagesWithMedia = MutableStateFlow<List<ChatMessageWithMedia>>(emptyList())
     val currentMessagesWithMedia: StateFlow<List<ChatMessageWithMedia>> = _currentMessagesWithMedia.asStateFlow()
 
@@ -46,6 +59,9 @@ class ChatViewModel @Inject constructor(
         loadConversations()
     }
 
+    /**
+     * Carga las conversaciones activas del usuario actual.
+     */
     fun loadConversations() {
         viewModelScope.launch {
             val currentUser = userRepository.getCurrentUser()

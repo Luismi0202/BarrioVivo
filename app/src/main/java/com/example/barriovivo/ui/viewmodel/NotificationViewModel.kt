@@ -3,6 +3,7 @@ package com.example.barriovivo.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.barriovivo.data.repository.NotificationRepository
+import com.example.barriovivo.data.repository.UserRepository
 import com.example.barriovivo.domain.model.Notification
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Estado de la UI para la pantalla de notificaciones.
+ *
+ * @property notifications Lista de notificaciones del usuario
+ * @property unreadCount Cantidad de notificaciones no leidas
+ * @property isLoading Indica carga en progreso
+ * @property error Mensaje de error
+ */
 data class NotificationUiState(
     val notifications: List<Notification> = emptyList(),
     val unreadCount: Int = 0,
@@ -18,9 +27,21 @@ data class NotificationUiState(
     val error: String? = null
 )
 
+/**
+ * ViewModel para gestion de notificaciones.
+ *
+ * Carga y gestiona las notificaciones del usuario actual:
+ * - Lista de notificaciones ordenadas por fecha
+ * - Contador de no leidas para badge
+ * - Marcado como leido al abrir
+ *
+ * @property notificationRepository Repositorio de notificaciones
+ * @property userRepository Repositorio para obtener usuario actual
+ */
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
-    private val notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationUiState())
@@ -75,4 +96,3 @@ class NotificationViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
     }
 }
-

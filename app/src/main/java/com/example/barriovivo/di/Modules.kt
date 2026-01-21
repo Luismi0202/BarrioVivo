@@ -21,8 +21,13 @@ import com.example.barriovivo.data.database.dao.ChatMessageDao
 
 private const val USER_PREFERENCES = "user_preferences"
 
+// Extension property para crear DataStore de preferencias
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = USER_PREFERENCES)
 
+/**
+ * Modulo Hilt para proveer DataStore.
+ * DataStore se utiliza para persistir la sesion del usuario actual.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
@@ -34,6 +39,12 @@ object DataStoreModule {
     }
 }
 
+/**
+ * Modulo Hilt para proveer la base de datos y sus DAOs.
+ *
+ * Todas las dependencias son Singleton para garantizar
+ * una unica instancia de la base de datos en toda la aplicacion.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -41,7 +52,6 @@ object DatabaseModule {
     @Singleton
     @Provides
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        // Reuse the companion getDatabase to ensure singleton Room instance
         return AppDatabase.getDatabase(context)
     }
 

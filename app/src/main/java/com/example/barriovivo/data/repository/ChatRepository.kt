@@ -14,6 +14,26 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Repositorio para gestion del sistema de chat.
+ *
+ * Maneja todas las operaciones relacionadas con conversaciones y mensajes:
+ * - Creacion de conversaciones al reclamar comida
+ * - Envio de mensajes de texto
+ * - Envio de mensajes multimedia (imagenes y audio)
+ * - Control de mensajes no leidos
+ * - Cierre de conversaciones
+ *
+ * Cada conversacion tiene exactamente dos participantes:
+ * - Creator: Usuario que publico la comida
+ * - Claimer: Usuario que reclamo la comida
+ *
+ * Los contadores de mensajes no leidos se mantienen por separado
+ * para cada participante de la conversacion.
+ *
+ * @property conversationDao DAO para operaciones de conversaciones
+ * @property messageDao DAO para operaciones de mensajes
+ */
 class ChatRepository @Inject constructor(
     private val conversationDao: ChatConversationDao,
     private val messageDao: ChatMessageDao

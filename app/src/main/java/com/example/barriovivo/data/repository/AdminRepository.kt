@@ -12,6 +12,10 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
 
+/**
+ * Clase de datos para deserializacion del archivo admin_config.json.
+ * Contiene la configuracion de cada administrador del sistema.
+ */
 @OptIn(kotlinx.serialization.InternalSerializationApi::class)
 @Serializable
 data class AdminConfigData(
@@ -25,6 +29,18 @@ data class AdminConfigData(
     val userId: String
 )
 
+/**
+ * Repositorio para gestion de administradores del sistema.
+ *
+ * Los administradores se definen en el archivo assets/admin_config.json
+ * y se cargan en la base de datos al iniciar la aplicacion.
+ *
+ * La verificacion de rol de admin se realiza consultando este repositorio,
+ * no el campo 'role' de UserEntity.
+ *
+ * @property adminDao DAO para operaciones de base de datos
+ * @property context Contexto de aplicacion para acceder a assets
+ */
 class AdminRepository @Inject constructor(
     private val adminDao: AdminDao,
     @ApplicationContext private val context: Context

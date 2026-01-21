@@ -16,6 +16,23 @@ import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Repositorio para gestion de usuarios.
+ *
+ * Maneja registro, autenticacion y actualizacion de datos de usuarios.
+ *
+ * Seguridad:
+ * - Las contrasenas se almacenan como hash SHA-256
+ * - La sesion se persiste en DataStore con ID de usuario y rol
+ *
+ * Nota importante sobre roles:
+ * El rol ADMIN no se determina por el campo 'role' de UserEntity,
+ * sino consultando AdminRepository.isUserAdmin() con el email.
+ * Esto permite que los admins se configuren externamente en admin_config.json
+ *
+ * @property userDao DAO para operaciones de base de datos
+ * @property dataStore DataStore para persistencia de sesion
+ */
 class UserRepository @Inject constructor(
     private val userDao: UserDao,
     private val dataStore: DataStore<Preferences>

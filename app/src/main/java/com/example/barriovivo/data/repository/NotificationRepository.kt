@@ -10,6 +10,21 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Repositorio para gestion de notificaciones del sistema.
+ *
+ * Las notificaciones informan a los usuarios sobre eventos:
+ * - FOOD_CLAIMED: Alguien reclamo su comida
+ * - NEW_MESSAGE: Nuevo mensaje en una conversacion
+ * - CHAT_CLOSED: Una conversacion fue cerrada
+ * - POST_DELETED_BY_ADMIN: Un admin elimino su publicacion
+ * - POST_REPORTED: (Solo admins) Una publicacion fue reportada
+ *
+ * Las notificaciones se muestran como badges en la UI
+ * y se pueden marcar como leidas individualmente.
+ *
+ * @property notificationDao DAO para operaciones de base de datos
+ */
 class NotificationRepository @Inject constructor(
     private val notificationDao: NotificationDao
 ) {

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.barriovivo.data.repository.ChatRepository
 import com.example.barriovivo.data.repository.MealPostRepository
 import com.example.barriovivo.data.repository.NotificationRepository
+import com.example.barriovivo.data.repository.UserRepository
+import com.example.barriovivo.domain.model.ChatConversation
 import com.example.barriovivo.domain.model.MealPost
 import com.example.barriovivo.domain.model.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,20 +16,58 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Estado de la UI para la pantalla de detalle de publicacion.
+ *
+ * @property mealPost Datos de la publicacion
+ * @property isLoading Indica carga en progreso
+ * @property isClaimLoading Indica reclamacion en progreso
+ * @property isReportLoading Indica reporte en progreso
+ * @property error Mensaje de error
+ * @property isOwner Si el usuario actual es el creador
+ * @property isClaimed Si ya fue reclamada
+ * @property claimSuccess Reclamacion exitosa
+ * @property reportSuccess Reporte enviado exitosamente
+ * @property conversation Conversacion creada tras reclamar
+ * @property conversationId ID de la conversacion
+ */
 data class MealDetailUiState(
     val mealPost: MealPost? = null,
     val isLoading: Boolean = false,
     val isClaimLoading: Boolean = false,
-    val claimSuccess: Boolean = false,
-    val conversationId: String? = null,
-    val error: String? = null,
     val isReportLoading: Boolean = false,
-    val reportSuccess: Boolean = false
+    val error: String? = null,
+    val isOwner: Boolean = false,
+    val isClaimed: Boolean = false,
+    val claimSuccess: Boolean = false,
+    val reportSuccess: Boolean = false,
+    val conversation: ChatConversation? = null,
+    val conversationId: String? = null
 )
 
+/**
+ * ViewModel para la pantalla de detalle de publicacion.
+ *
+ * Funcionalidades:
+ * - Carga de detalles de una publicacion
+ * - Reclamacion de comida (crea conversacion automaticamente)
+ * - Reporte de publicacion inapropiada
+ * - Verificacion de propiedad y estado
+ *
+ * Al reclamar una comida:
+ * 1. Se marca como no disponible
+ * 2. Se crea una conversacion entre usuarios
+ * 3. Se notifica al propietario
+ *
+ * @property mealPostRepository Repositorio de publicaciones
+ * @property userRepository Repositorio de usuarios
+ * @property chatRepository Repositorio de chat
+ * @property notificationRepository Repositorio de notificaciones
+ */
 @HiltViewModel
 class MealDetailViewModel @Inject constructor(
     private val mealPostRepository: MealPostRepository,
+    private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
@@ -107,7 +147,7 @@ class MealDetailViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         isClaimLoading = false,
                         claimSuccess = true,
-                        conversationId = conversation.id,
+                        conversation = conversation,
                         error = null
                     )
 
@@ -141,8 +181,8 @@ class MealDetailViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(claimSuccess = false)
     }
 
-    fun clearConversationId() {
-        _uiState.value = _uiState.value.copy(conversationId = null)
+    fun clearConversation() {
+        _uiState.value = _uiState.value.copy(conversation = null)
     }
 
     fun clearReportSuccess() {
@@ -208,4 +248,3 @@ class MealDetailViewModel @Inject constructor(
         }
     }
 }
-

@@ -14,6 +14,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Estado de la UI para la pantalla de autenticacion.
+ *
+ * @property isLoading Indica si hay una operacion en progreso
+ * @property error Mensaje de error a mostrar
+ * @property currentUser Usuario autenticado actual
+ * @property isLoggedIn Si hay sesion activa
+ * @property userRole Rol del usuario (USER o ADMIN)
+ * @property successMessage Mensaje de exito temporal
+ */
 data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -23,6 +33,19 @@ data class AuthUiState(
     val successMessage: String? = null
 )
 
+/**
+ * ViewModel para gestion de autenticacion.
+ *
+ * Maneja login, registro, recuperacion de sesion y logout.
+ *
+ * Verificacion de rol de administrador:
+ * El rol ADMIN se determina consultando AdminRepository, no el campo
+ * 'role' de la entidad de usuario. Esto permite que los administradores
+ * se configuren externamente en admin_config.json.
+ *
+ * @property userRepository Repositorio para operaciones de usuario
+ * @property adminRepository Repositorio para verificacion de admin
+ */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -36,16 +59,24 @@ class AuthViewModel @Inject constructor(
         checkCurrentUser()
     }
 
+    /**
+     * Verifica si existe una sesion guardada y recupera los datos del usuario.
+     * Tambien reverifica el rol de admin consultando la tabla de administradores.
+     */
     private fun checkCurrentUser() {
         viewModelScope.launch {
             userRepository.currentUserIdFlow.collect { userId ->
                 if (userId != null) {
                     val user = userRepository.getUserById(userId)
                     if (user != null) {
+                        // Verificar si el usuario es administrador
+                        val isAdmin = adminRepository.isUserAdmin(user.email)
+                        val role = if (isAdmin) UserRole.ADMIN else user.role
+
                         _uiState.value = _uiState.value.copy(
-                            currentUser = user,
+                            currentUser = user.copy(role = role),
                             isLoggedIn = true,
-                            userRole = user.role
+                            userRole = role
                         )
                     } else {
                         // Usuario no encontrado, asegurar estado limpio

@@ -6,13 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -20,21 +18,32 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.barriovivo.ui.screen.AuthScreen
-import com.example.barriovivo.ui.screen.ChatConversationScreen
-import com.example.barriovivo.ui.screen.ChatListScreen
-import com.example.barriovivo.ui.screen.CreateMealScreen
-import com.example.barriovivo.ui.screen.HomeScreen
-import com.example.barriovivo.ui.screen.MealDetailScreen
-import com.example.barriovivo.ui.screen.NotificationScreen
-import com.example.barriovivo.ui.screen.ProfileScreen
+import com.example.barriovivo.domain.model.UserRole
+import com.example.barriovivo.ui.screen.*
 import com.example.barriovivo.ui.theme.BarrioVivoTheme
-import com.example.barriovivo.ui.viewmodel.AuthViewModel
-import com.example.barriovivo.ui.viewmodel.ChatViewModel
-import com.example.barriovivo.ui.viewmodel.HomeViewModel
-import com.example.barriovivo.ui.viewmodel.MealDetailViewModel
+import com.example.barriovivo.ui.viewmodel.*
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Activity principal de la aplicacion BarrioVivo.
+ *
+ * Implementa navegacion con Jetpack Compose Navigation.
+ * Las rutas principales son:
+ * - auth: Pantalla de login/registro
+ * - home: Feed principal de publicaciones
+ * - create_meal: Crear nueva publicacion
+ * - meal_detail/{id}: Detalle de publicacion
+ * - chat_list: Lista de conversaciones
+ * - chat/{id}: Conversacion individual
+ * - notifications: Centro de notificaciones
+ * - profile: Perfil del usuario
+ * - admin_dashboard: Panel de administracion (solo admins)
+ *
+ * La navegacion inicial depende del estado de autenticacion:
+ * - Usuario no logueado: auth
+ * - Usuario normal logueado: home
+ * - Administrador logueado: admin_dashboard
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,13 +56,13 @@ class MainActivity : ComponentActivity() {
                 val authState by authViewModel.uiState.collectAsState()
                 val snackbarHostState = remember { SnackbarHostState() }
 
-                androidx.compose.material3.Scaffold(
+                Scaffold(
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = if (authState.isLoggedIn) {
-                            if (authState.userRole == com.example.barriovivo.domain.model.UserRole.ADMIN) {
+                            if (authState.userRole == UserRole.ADMIN) {
                                 "admin_dashboard"
                             } else {
                                 "home"
@@ -78,10 +87,10 @@ class MainActivity : ComponentActivity() {
                                 onErrorDismiss = { authViewModel.clearError() }
                             )
 
-                            // Navegación controlada por efecto según el rol
+                            // Navegacion controlada por efecto segun el rol
                             LaunchedEffect(authState.isLoggedIn, authState.userRole) {
                                 if (authState.isLoggedIn) {
-                                    val destination = if (authState.userRole == com.example.barriovivo.domain.model.UserRole.ADMIN) {
+                                    val destination = if (authState.userRole == UserRole.ADMIN) {
                                         "admin_dashboard"
                                     } else {
                                         "home"
@@ -99,10 +108,10 @@ class MainActivity : ComponentActivity() {
                             val homeState by homeViewModel.uiState.collectAsState()
                             val chatViewModel: ChatViewModel = hiltViewModel()
                             val totalUnreadCount by chatViewModel.totalUnreadCount.collectAsState()
-                            val notificationViewModel: com.example.barriovivo.ui.viewmodel.NotificationViewModel = hiltViewModel()
+                            val notificationViewModel: NotificationViewModel = hiltViewModel()
                             val notificationState by notificationViewModel.uiState.collectAsState()
 
-                            // Observar el resultado de la pantalla de creación
+                            // Observar el resultado de la pantalla de creacion
                             val newPostCreatedState = navController.currentBackStackEntry
                                 ?.savedStateHandle
                                 ?.getLiveData<Boolean>("new_post_created")
@@ -117,13 +126,23 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // Cargar datos solo cuando haya usuario y una vez
-                            LaunchedEffect(authState.currentUser) {
+                            LaunchedEffect(authState.currentUser, authState.userRole) {
                                 authState.currentUser?.let { user ->
+                                    // Verificar si es administrador
+                                    val isAdmin = authState.userRole == UserRole.ADMIN
+                                    homeViewModel.setIsAdmin(isAdmin)
+
                                     homeViewModel.loadUserMealPosts(user.id)
-                                    // Usar ubicación del usuario o Madrid por defecto
-                                    val lat = if (user.location.latitude != 0.0) user.location.latitude else 40.4168
-                                    val lon = if (user.location.longitude != 0.0) user.location.longitude else -3.7038
-                                    homeViewModel.loadNearbyMealPosts(lat, lon)
+
+                                    if (isAdmin) {
+                                        // Administradores ven TODAS las comidas sin filtro de ubicación
+                                        homeViewModel.loadAllMealPosts()
+                                    } else {
+                                        // Usuarios normales ven solo comidas cercanas
+                                        val lat = if (user.location.latitude != 0.0) user.location.latitude else 40.4168
+                                        val lon = if (user.location.longitude != 0.0) user.location.longitude else -3.7038
+                                        homeViewModel.loadNearbyMealPosts(lat, lon)
+                                    }
                                     // Cargar notificaciones no leídas
                                     notificationViewModel.loadUnreadNotifications(user.id)
                                 }
@@ -135,6 +154,7 @@ class MainActivity : ComponentActivity() {
                                 isLoading = homeState.isLoading,
                                 unreadChatCount = totalUnreadCount,
                                 unreadNotificationCount = notificationState.unreadCount,
+                                isAdmin = homeState.isAdmin,
                                 onCreateMealClick = { navController.navigate("create_meal") },
                                 onMealClick = { mealId ->
                                     navController.navigate("meal_detail/$mealId")
@@ -254,7 +274,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("admin_dashboard") {
-                            com.example.barriovivo.ui.screen.AdminDashboardScreen(
+                            AdminDashboardScreen(
                                 onLogout = {
                                     authViewModel.logout()
                                     navController.navigate("auth") {

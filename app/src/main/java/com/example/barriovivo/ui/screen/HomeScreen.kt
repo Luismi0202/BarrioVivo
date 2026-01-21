@@ -41,6 +41,22 @@ import com.example.barriovivo.ui.theme.TextDark
 import com.example.barriovivo.ui.theme.TextGray
 import com.example.barriovivo.ui.theme.ErrorRed
 
+/**
+ * Pantalla principal de la aplicacion.
+ *
+ * Muestra dos tabs:
+ * - Disponibles: Publicaciones cercanas al usuario (filtradas por ubicacion)
+ * - Mis publicaciones: Publicaciones creadas por el usuario actual
+ *
+ * Incluye accesos rapidos a:
+ * - Crear nueva publicacion
+ * - Lista de chats (con badge de no leidos)
+ * - Notificaciones (con badge de no leidas)
+ * - Perfil de usuario
+ * - Cerrar sesion
+ *
+ * Para administradores, muestra todas las publicaciones sin filtro de ubicacion.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -49,6 +65,7 @@ fun HomeScreen(
     isLoading: Boolean = false,
     unreadChatCount: Int = 0,
     unreadNotificationCount: Int = 0,
+    isAdmin: Boolean = false,
     onCreateMealClick: () -> Unit = {},
     onMealClick: (mealId: String) -> Unit = {},
     onNotificationsClick: () -> Unit = {},
@@ -57,7 +74,8 @@ fun HomeScreen(
     onLogoutClick: () -> Unit = {}
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Cerca de ti", "Mis Comidas")
+    // Mostrar "Todas las comidas" si es admin, sino "Cerca de ti"
+    val tabs = listOf(if (isAdmin) "🔑 Todas las comidas" else "Cerca de ti", "Mis Comidas")
 
     Scaffold(
         topBar = {
@@ -433,4 +451,3 @@ fun MealCardItem(
         }
     }
 }
-
