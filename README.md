@@ -632,28 +632,7 @@ Un tutorial rápido de uso (si lo tuviese que grabar o explicarlo en clase) ser�
 
 ## RA7 - Distribución de aplicaciones (FFOE)
 
-### RA7.a - Empaquetado de la aplicación
-
-
-### RA7.b - Personalización del instalador
-
-
-### RA7.c - Paquete desde el entorno
-
-
-### RA7.d - Herramientas externas
-
-
-### RA7.e - Firma digital
-
-
-### RA7.f - Instalación desatendida
-
-
-### RA7.g - Desinstalación
-
-
-### RA7.h - Canales de distribución
+DENTRO DEL MANUAL DE INSTALACIÓN YA SE HABLA DE QUE EN EL RELEASE ESTÁ EL EMPAQUETADO DE MI APLIACIÓN ASI QUE OMITO HABLAR PUNTO A PUNTO DE ESTE RA, YA QUE SENCILLAMENTE EN EL IDE HICE UN APK, LO SUBI A RELEASES Y LUEGO EXPLIQUÉ COMO INSTALARLO. PARA DESINSTALARLO SIMPLEMENTE HAY QUE DESINSTALARLO COMO UNA APP CUALQUIERA
 
 
 ---
