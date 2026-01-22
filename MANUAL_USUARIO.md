@@ -11,11 +11,12 @@ Cuando abres la app lo primero que te sale es la pantalla de autenticación (log
 - Recuperar contraseña.
 
 Si inicias sesión con un usuario que está configurado como admin, te mandará directamente al panel de admin.
-Capturas (rellenar):
 
-- [ ] Captura login
-- [ ] Captura registro
-- [ ] Captura olvidé contraseña
+Capturas:
+
+- ![Captura login](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/INICIAR_SESION.jpeg) 
+- ![Captura registro](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/CREAR_CUENTA.jpeg) 
+- ![Captura olvidé contraseña](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_OLVIDE_CONTRASENIA.jpeg)
 
 ## 2. Registro de usuario normal
 
@@ -49,10 +50,10 @@ Lo que se ve y se puede hacer:
 - Ir al perfil.
 - Crear una publicación nueva.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura Home (usuario)
-- [ ] Captura lista mis publicaciones
+- ![Captura Home (usuario)](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_USUARIO.jpeg)
+- ![Captura lista mis publicaciones](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_USUARIO.jpeg) 
 
 ## 5. Crear una publicación
 
@@ -66,10 +67,10 @@ Para crear una publicación tienes que:
 
 Si falta algún dato importante (por ejemplo la foto), la app no deja publicar y te muestra el error.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura crear publicación (formulario)
-- [ ] Captura selector/cámara
+- ![Captura crear publicación (formulario)](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PUBLICAR_ITEM.jpeg) 
+- ![Captura selector/cámara](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/GALERIA_CAMARA.jpeg) 
 
 ## 6. Ver detalle de una publicación
 
@@ -85,9 +86,9 @@ Acciones:
 - Reclamar comida (si no es tuya y está disponible).
 - Reportar publicación (si no es tuya).
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura detalle publicación
+- ![Captura detalle publicación](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/DETALLE_ITEM.jpeg)
 
 ## 7. Reclamar comida y chat
 
@@ -104,11 +105,11 @@ En el chat se puede:
 
 La idea del chat es quedar y acordar la recogida de forma rápida.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura lista de chats
-- [ ] Captura chat abierto
-- [ ] Captura enviando audio
+- ![Captura lista de chats](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/CHATS.jpeg) 
+- ![Captura chat abierto](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/CHAT_ABIERTO.jpeg) 
+- ![Captura enviando audio](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/ENVIANDO_AUDIO.jpeg) 
 
 ## 8. Notificaciones
 
@@ -117,17 +118,17 @@ Las notificaciones sirven para informar al usuario de eventos importantes, por e
 - Si alguien reclama tu comida.
 - Si hay actividad relacionada con tus publicaciones.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura pantalla notificaciones
+- ![Captura pantalla notificaciones](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PESTA%C3%91A_NOTIFICACIONES.jpeg) 
 
 ## 9. Perfil
 
 En perfil puedes ver información de tu cuenta y según la configuración, cambiar contraseña u opciones relacionadas.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura perfil
+- ![Captura perfil](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PESTA%C3%91A_PERFIL.jpeg) 
 
 ## 10. Panel de administrador
 
@@ -140,10 +141,10 @@ Cuando entras como admin, tu pantalla principal es el panel de administrador. De
 
 Esto es lo que mantiene la app limpia y evita que la gente suba cualquier cosa.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura panel admin
-- [ ] Captura lista reportados
+- ![Captura panel admin](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_ADMIN.jpeg)
+- ![Captura lista reportados](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PESTA%C3%91A_REPORTADOS.jpeg) 
 
 ## 11. Cierre de sesión
 
@@ -151,7 +152,7 @@ En las pantallas principales tienes la opción de cerrar sesión. Al hacerlo vue
 
 ---
 
-## Referencias de código (por si quiero justificar en la memoria)
+## Referencias de código
 
 Pantallas principales:
 
