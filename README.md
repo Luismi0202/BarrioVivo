@@ -6,10 +6,31 @@
 
 ## RA1 - Interfaz Gráfica de Usuario
 
+
 ### RA1.a - Análisis de herramientas y librerías
 
+Para la realización de mi idea, obviamente he tenido que usar una serie de herramientas para poder llevarla acabo. Lo más importante es que claramente se necesita un entorno de dearrollo para poder realizar un aplicacion móvil, en mi caso he utlizado Android Studio y como lenguaje de programación he usado Kotlin, ambas son las cosas que he aprendido a lo largo de este ciclo formativo para poder llevar a cabo una aplicación, así que no se sale para nada de lo aprendido.
+
+Las librerías son códigos que ya están hechos que tu los importas en tu propio código para poder usarlo. En mi caso he utlizado libreris como icons para los iconos, hilt y rom para la persistencia local logrando hacer una base de datos en el propio móvil localmente y haciendo así un login y que los datos no se pierdan cuando se cierra la aplicación, también he usado android serialization para la serialización de objetos (es decir, transformar una cadena de texto en un objeto o viceversa), esto último sobre todo ha sido porque tengo un json dentro del propio código que es donde se encuentran los administradores y se encuentran serializados y el propio código los deserializa para transformarlos en usuarios administradores, haciendo que si loggeas con uno de los usuarios que están puestos en el json, abra como administrador. También he utilizado otras herramientas como pueden ser herramientas que te permiten usar la cámara del móvil o el micrófono para usarlos dentro de mi app. Esta clase de cosas no serían posible si no se dieran los permisos en el AndroidManifest
+
+FRAGMENTOS DE CÓDIGO:
+
+JSON ADMINISTRADORES
+
+https://github.com/Luismi0202/BarrioVivo/blob/91a25f5e58ea925604030531db8f9e83d1f73c10/app/src/main/assets/admin_config.json#L1-L20
+
+GRADLE CON IMPORTACIONES DE HERRAMIENTAS
+https://github.com/Luismi0202/BarrioVivo/blob/91a25f5e58ea925604030531db8f9e83d1f73c10/app/build.gradle.kts#L1-L117
+
+SETTINGS DE GRADLE CON LAS IMPORTACIONES NECESARIAS
+https://github.com/Luismi0202/BarrioVivo/blob/91a25f5e58ea925604030531db8f9e83d1f73c10/build.gradle.kts#L1-L7
+
+EJEMPLO DE UN CÓDIGO CON ALGUNAS IMPORTACIONES DE LIBRERÍA (EN TODOS LOS CÓDIGOS SE IMPORTAN COSAS, ADEMÁS SE PUEDE VER COMO IMPORTO MIS PROPIAS CLASES CREADAS DENTRO DE ESTE MISMO)
+
+https://github.com/Luismi0202/BarrioVivo/blob/91a25f5e58ea925604030531db8f9e83d1f73c10/app/src/main/java/com/example/barriovivo/di/Modules.kt#L1-L25
 
 ### RA1.b - Creación de interfaz gráfica
+
 
 
 ### RA1.c - Uso de layouts y posicionamiento
