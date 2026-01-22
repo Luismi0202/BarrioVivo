@@ -587,7 +587,7 @@ Ahí se explica:
 
 Como no todo el mundo va a compilar el proyecto con Android Studio, he hecho un manual de instalación pensado para instalar la APK desde un release (viene en una carpeta comprimida).
 
-MANUAL DE INSTALACIÓN:
+MANUAL DE INSTALACIÓN: https://github.com/Luismi0202/BarrioVivo/blob/main/MANUAL_INSTALACION.md
 
 ./MANUAL_INSTALACION.md
 
