@@ -98,26 +98,26 @@ Por ejemplo, en la pantalla de usuario el feed de publicaciones y los filtros se
 OTRAS PANTALLAS DONDE SE VE MUY BIEN EL LAYOUT Y LA JERARQUÍA VISUAL:
 
 LOGIN/REGISTRO (AuthScreen)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AuthScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AuthScreen.kt#L1-L220
 
 CHAT (ChatScreen)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt#L1-L260
 
 DETALLE DE PUBLICACIÓN (MealDetailScreen)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/MealDetailScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/MealDetailScreen.kt#L1-L220
 
 CREAR PUBLICACIÓN (CreateMealScreen)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt#L1-L220
 
 PANEL ADMIN (AdminDashboardScreen)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt#L1-L240
 
 ### RA1.d - Personalización de componentes
 
 En mi caso no me he limitado a usar los componentes por defecto sin más, si no que he creado componentes reutilizables para mantener un estilo consistente en toda la aplicación. Esto se puede ver sobre todo en el archivo de componentes, donde tengo botones, cards, top bars, inputs y pequeños elementos visuales que se repiten en varias pantallas.
 
 ARCHIVO PRINCIPAL DE COMPONENTES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt#L1-L200
 
 Además, la personalización global del estilo (colores y tipografías) está en el theme. Esto hace que todas las pantallas tengan una estética coherente.
 
@@ -128,7 +128,7 @@ TIPOGRAFÍA
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/theme/Type.kt
 
 TEMA
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/theme/Theme.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/theme/Theme.kt#L1-L90
 
 La idea ha sido que, por ejemplo, un botón principal o una card de publicación se vea igual en Home, en detalle y en admin. Así no tengo el diseño duplicado en cada pantalla y mantengo mejor el proyecto.
 
@@ -149,33 +149,33 @@ Room (DAO) -> Repository -> ViewModel -> Screen
 Esto se ve muy claro por ejemplo en la parte de publicaciones:
 
 DAO DE PUBLICACIONES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/MealPostDao.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/MealPostDao.kt#L1-L90
 
 REPOSITORIO DE PUBLICACIONES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/MealPostRepository.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/MealPostRepository.kt#L1-L200
 
 VIEWMODEL PRINCIPAL (Home)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/HomeViewModel.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/HomeViewModel.kt#L1-L170
 
 PANTALLA PRINCIPAL (Home)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt#L1-L220
 
 Otro ejemplo claro es el chat, que es de las partes más completas porque tiene conversaciones, mensajes y lógica de adjuntos:
 
 DAO DE CONVERSACIONES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/ChatConversationDao.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/ChatConversationDao.kt#L1-L120
 
 DAO DE MENSAJES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/ChatMessageDao.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/dao/ChatMessageDao.kt#L1-L90
 
 REPOSITORIO DE CHAT
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/ChatRepository.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/ChatRepository.kt#L1-L220
 
 VIEWMODEL DE CHAT
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/ChatViewModel.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/ChatViewModel.kt#L1-L170
 
 PANTALLA DE CHAT
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt#L1-L260
 
 ### RA1.f - Modificación del código
 
@@ -189,10 +189,10 @@ Durante el desarrollo he ido modificando el código para ir metiendo funcionalid
 Al final, no es solo “hacer pantallas”, si no que todo está conectado con el flujo de datos que he comentado antes.
 
 ARCHIVO DE APP PARA INICIALIZACIÓN Y RUTAS
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/BarrioVivoApp.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/BarrioVivoApp.kt#L1-L99
 
 ACTIVITY PRINCIPAL Y NAVEGACIÓN
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt#L1-L336
 
 ### RA1.g - Asociación de eventos
 
@@ -206,16 +206,16 @@ Ejemplos claros de eventos:
 - Admin: borrar publicaciones es un evento que dispara una acción del AdminViewModel que actualiza la base de datos y refresca la lista.
 
 VIEWMODEL DE AUTENTICACIÓN (EVENTOS DE LOGIN/REGISTRO)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/AuthViewModel.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/AuthViewModel.kt#L1-L302
 
 PANTALLA DE AUTENTICACIÓN (BOTONES E INPUTS)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AuthScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AuthScreen.kt#L1-L220
 
 VIEWMODEL DE CREAR PUBLICACIÓN
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/CreateMealViewModel.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/CreateMealViewModel.kt#L1-L126
 
 PANTALLA DE CREAR PUBLICACIÓN
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt#L1-L220
 
 ### RA1.h - App integrada
 
@@ -231,7 +231,7 @@ La app está integrada porque todas las partes principales están conectadas ent
 No son pantallas aisladas, si no que todo usa el mismo modelo de datos, la misma base de datos y la misma navegación. La navegación y el arranque de toda la app se gestiona desde la activity principal.
 
 MAIN ACTIVITY
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt#L1-L336
 
 ---
 
@@ -249,7 +249,7 @@ A nivel de Android, esto implica trabajar con permisos y con APIs de sistema. No
 El eje principal de estas interacciones lo tengo dentro de la parte de chat, que es donde más sentido tiene mandar audio o imagen.
 
 PANTALLA DE CHAT
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt#L1-L260
 
 ### RA2.b - Diseño conceptual NUI
 
@@ -267,10 +267,10 @@ La interacción por voz en mi app está representada por los mensajes de audio e
 Lo importante aquí es que el audio se trate como un tipo de mensaje más, igual que un texto o una imagen, y que el chat tenga un diseño que lo soporte.
 
 PANTALLA DE CHAT
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ChatScreen.kt#L1-L260
 
 REPOSITORIO DE CHAT (GESTIÓN DE MENSAJES)
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/ChatRepository.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/ChatRepository.kt#L1-L324
 
 ### RA2.d - Interacción por gesto
 
@@ -282,10 +282,10 @@ Ahora mismo no tengo implementada una interacción por gestos avanzada (tipo ges
 Esto encaja muy bien porque en Compose se puede implementar con componentes de swipe (por ejemplo en Material) sin cambiar toda la arquitectura. Simplemente el gesto llamaría a un evento del ViewModel igual que un botón.
 
 PANTALLA DE NOTIFICACIONES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/NotificationScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/NotificationScreen.kt#L1-L171
 
 PANEL ADMIN
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt#L1-L240
 
 ### RA2.e - Detección facial/corporal
 
@@ -330,7 +330,7 @@ Los componentes reutilizables están en el archivo `Components.kt`. La idea es q
 Esto evita que copie y pegue código en cada screen.
 
 ARCHIVO DE COMPONENTES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt#L1-L432
 
 ### RA3.c - Parámetros y defaults
 
@@ -367,13 +367,13 @@ https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example
 Los componentes reutilizables se usan en varias pantallas (Home, detalle, crear publicación, auth, admin, etc.). Se puede comprobar porque las screens importan composables del paquete `ui.component`.
 
 HOME
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt#L1-L454
 
 DETALLE
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/MealDetailScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/MealDetailScreen.kt#L1-L655
 
 CREAR PUBLICACIÓN
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/CreateMealScreen.kt#L1-L638
 
 ---
 
@@ -435,7 +435,7 @@ La idea es que el usuario lo entienda sin tener que aprender nada raro.
 El diseño visual lo he hecho consistente usando un theme y componentes reutilizables. Así mantengo colores, tipografía y estilo iguales en toda la app.
 
 THEME
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/theme/Theme.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/theme/Theme.kt#L1-L90
 
 ### RA4.h - Claridad de mensajes
 
@@ -479,22 +479,22 @@ Si tuviera que definir un informe dentro de mi app (por ejemplo para admin), la 
 
 Esto encaja con cómo ya tengo estructurados los datos en Room.
 
-ENTIDADES Y MODELOS
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt
+ENTIDADES
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt#L1-L196
 
 ### RA5.b - Generación de informes a partir de fuentes de datos
 
 La fuente de datos principal es Room. A partir de los DAOs puedo obtener listados y luego mostrarlos en UI.
 
 BASE DE DATOS
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/AppDatabase.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/AppDatabase.kt#L1-L210
 
 ### RA5.c - Filtros sobre los valores a presentar
 
 Los filtros se aplican a nivel de repositorio/viewmodel, y luego la pantalla pinta el resultado. Por ejemplo, en Home filtro por zona del usuario y también filtro por “mis publicaciones” o global.
 
 HOME VIEWMODEL
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/HomeViewModel.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/HomeViewModel.kt#L1-L170
 
 ### RA5.d - Valores calculados, recuentos o totales
 
@@ -532,7 +532,7 @@ No tengo un sistema automatizado de ayuda contextual, pero sí hay ayudas implí
 La persistencia se basa en Room. Tengo entidades claras y DAOs separados para cada tipo de dato.
 
 ENTIDADES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt#L1-L196
 
 DAOS
 https://github.com/Luismi0202/BarrioVivo/tree/main/app/src/main/java/com/example/barriovivo/data/database/dao
