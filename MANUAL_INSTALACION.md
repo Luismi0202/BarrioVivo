@@ -22,10 +22,10 @@ La instalación básica es: descargar el release, descomprimir, abrir el APK y d
 2. Ve a la sección Releases.
 3. En el último release, descarga la carpeta comprimida (zip/rar) donde viene el APK.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura entrando a releases
-- [ ] Captura descargando el zip
+- ![Captura entrando a releases](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/REPO.jpeg) 
+- ![Captura descargando el zip](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/INSTALANDO_ZIP.jpeg) 
 
 ### 2.2 Descomprimir la carpeta
 
@@ -34,11 +34,9 @@ Capturas (rellenar):
 3. Busca el archivo comprimido del release.
 4. Dale a extraer/descomprimir.
 
-Capturas (rellenar):
+Capturas:
 
-- [ ] Captura archivo descargado
-- [ ] Captura opción extraer
-- [ ] Captura carpeta ya extraída
+- ![Captura opción extraer](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/DESCOMPRIMIENDO_CARPETA.jpeg) 
 
 ### 2.3 Instalar el APK
 
@@ -48,12 +46,10 @@ Capturas (rellenar):
 4. Si te sale el aviso de "instalar apps desconocidas", tienes que permitirlo para tu navegador o para tu gestor de archivos.
 5. Dale a instalar.
 
-Capturas (rellenar):
-
-- [ ] Captura pulsando el APK
-- [ ] Captura del permiso de origen desconocido
-- [ ] Captura botón instalar
-- [ ] Captura app instalada
+Capturas:
+- ![Captura botón instalar](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/PESTA%C3%91A_INSTALACION.jpeg)
+- ![Captura del permiso de origen desconocido](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/PERMISOS_APP.jpeg) 
+- ![Captura app instalada](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_INSTALACION/APP_INSTALADA.jpeg) 
 
 ## 3. Instalación alternativa: descargar en PC y pasar al móvil
 
