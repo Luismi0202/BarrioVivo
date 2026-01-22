@@ -117,7 +117,7 @@ https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example
 En mi caso no me he limitado a usar los componentes por defecto sin más, si no que he creado componentes reutilizables para mantener un estilo consistente en toda la aplicación. Esto se puede ver sobre todo en el archivo de componentes, donde tengo botones, cards, top bars, inputs y pequeños elementos visuales que se repiten en varias pantallas.
 
 ARCHIVO PRINCIPAL DE COMPONENTES
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt#L1-L200
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt#L1-L432
 
 Además, la personalización global del estilo (colores y tipografías) está en el theme. Esto hace que todas las pantallas tengan una estética coherente.
 
@@ -511,100 +511,103 @@ No tengo gráficos implementados en esta versión. Si se quisieran añadir, una 
 
 ## RA6 - Ayudas y Documentación
 
+A diferencia de como lo tenía antes (que lo estaba explicando un poco por encima), aquí he decidido hacerlo más serio y dejar documentación como si fuese un proyecto real, con su manual de usuario y su manual de instalación.
+
+MANUAL DE USUARIO (archivo dentro del proyecto):
+
+./MANUAL_USUARIO.md
+
+MANUAL DE INSTALACIÓN (APK desde Releases):
+
+./MANUAL_INSTALACION.md
+
 ### RA6.a - Identificación de sistemas de generación de ayudas
 
-En mi caso, el sistema de ayuda está centrado en documentación y mensajes dentro de la UI (textos, placeholders, validaciones). No tengo un sistema de ayuda externo, pero sí se puede considerar “ayuda” todo lo que guía al usuario.
+En mi caso la ayuda la he planteado en dos niveles:
+
+- Ayuda dentro de la propia app: textos claros, labels en inputs, mensajes de error y pantallas bastante guiadas (por ejemplo registro, crear publicación, etc.).
+- Ayuda fuera de la app: documentación escrita en markdown para que cualquiera pueda entender el flujo y pueda instalar la APK sin tener Android Studio.
 
 ### RA6.b - Generación de ayudas en formatos habituales
 
-El formato habitual que tengo es:
+He generado la ayuda en un formato que es el más habitual en GitHub:
 
-- README con explicación del proyecto
-- Textos dentro de la app (por ejemplo labels de inputs)
-- Capturas en la carpeta `Capturas/`
+- README principal del proyecto (este).
+- Manual de usuario.
+- Manual de instalación.
+
+Esto además lo puedo acompañar con capturas y vídeo si hiciera falta.
 
 ### RA6.c - Ayudas sensibles al contexto
 
-No tengo un sistema automatizado de ayuda contextual, pero sí hay ayudas implícitas en cada pantalla. Por ejemplo, en crear publicación, el usuario entiende que tiene que poner la fecha de caducidad porque el formulario se lo pide.
+En la app, la ayuda sensible al contexto está sobre todo en:
 
-### RA6.d - Documentación de la estructura de información persistente
+- Formularios: si falta algo obligatorio (por ejemplo foto en crear publicación) el propio formulario te lo dice.
+- Validaciones: email inválido, contraseñas que no coinciden, etc.
+- Mensajes de error en pantalla: cuando algo falla, se muestra el motivo.
 
-La persistencia se basa en Room. Tengo entidades claras y DAOs separados para cada tipo de dato.
+Toda esa parte se ve muy clara en el flujo de Auth y en el flujo de crear publicación.
+
+### RA6.d - Documentación de la estructura de la información persistente
+
+La estructura persistente de datos está documentada a nivel de código con Room:
+
+- Entidades: usuarios, publicaciones, notificaciones, admins, conversaciones y mensajes.
+- DAOs: consultas y actualizaciones.
+- Repositorios: lógica de acceso a datos.
 
 ENTIDADES
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt#L1-L196
+
+BASE DE DATOS
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/AppDatabase.kt#L1-L165
 
 DAOS
 https://github.com/Luismi0202/BarrioVivo/tree/main/app/src/main/java/com/example/barriovivo/data/database/dao
 
 ### RA6.e - Manual de usuario y guía de referencia
 
-El manual de usuario, en mi caso, se puede construir con el flujo real de pantallas:
+He creado un manual de usuario dentro del propio proyecto para explicar el uso real de BarrioVivo, tanto como usuario normal como admin.
 
-- Registrarse / iniciar sesión
-- Entrar a Home y ver publicaciones
-- Crear publicación
-- Abrir una publicación y reclamar
-- Abrir chat y acordar recogida
-- Ver notificaciones
+MANUAL DE USUARIO:
 
-Las capturas de pantallas ya sirven como guía rápida.
+./MANUAL_USUARIO.md
 
-CAPTURAS
-https://github.com/Luismi0202/BarrioVivo/tree/main/Capturas/CAPTURAS_APP
+Ahí se explica:
+
+- Login/registro/recuperar contraseña.
+- Publicar comida con fotos y fecha de caducidad.
+- Ver publicaciones cercanas.
+- Reclamar comida.
+- Chat con mensajes, fotos y audios.
+- Notificaciones.
+- Panel de admin (moderación).
 
 ### RA6.f - Manual técnico de instalación/configuración
 
-A nivel técnico, la instalación/configuración se basa en:
+Como no todo el mundo va a compilar el proyecto con Android Studio, he hecho un manual de instalación pensado para instalar la APK desde un release (viene en una carpeta comprimida).
 
-- Abrir el proyecto en Android Studio
-- Sincronizar Gradle
-- Ejecutar en emulador o dispositivo
+MANUAL DE INSTALACIÓN:
 
-Las dependencias están definidas en el Gradle del módulo app.
+./MANUAL_INSTALACION.md
 
-GRADLE APP
-https://github.com/Luismi0202/BarrioVivo/blob/main/app/build.gradle.kts
+Ahí explico dos formas reales:
+
+- Descargar el release desde el móvil, descomprimir y instalar.
+- Descargar en PC, descomprimir y pasar el APK al móvil por USB o por WhatsApp.
+
+Y también dejo plantillas para meter capturas del proceso de instalación en mi propio móvil.
 
 ### RA6.g - Confección de tutoriales
 
-Un tutorial corto (paso a paso) podría ser:
+Un tutorial rápido de uso (si lo tuviese que grabar o explicarlo en clase) sería:
 
-1. Crear cuenta
-2. Crear una publicación con foto y fecha correcta
-3. Desde otro usuario, reclamarla
-4. Abrir el chat y mandar un audio
-5. Como admin, borrar una publicación que no cumpla normas
-
----
-
-## RA8 - Pruebas
-
-### RA8.a - Estrategia de pruebas
-
-Mi estrategia ha sido principalmente pruebas manuales por flujo y revisar estados límite:
-
-- Campos vacíos en formularios
-- Login incorrecto
-- Publicaciones sin fecha
-- Chat sin conexión entre usuarios (que no se rompa)
-- Borrar publicaciones como admin
-
-### RA8.b - Pruebas de integración
-
-Las pruebas de integración más importantes son las que comprueban que todo el flujo Room -> Repository -> ViewModel -> UI funciona.
-
-Por ejemplo:
-
-- Creo una publicación en CreateMealScreen -> se guarda en Room -> aparece en Home.
-- Reclamo una publicación -> se crea conversación -> aparece en Chat.
-
-### RA8.g - Documentación de pruebas
-
-La documentación de pruebas la hago describiendo los flujos probados (como en RA4.i y RA8.a). También las capturas ayudan a demostrar que la app funciona.
-
-CAPTURAS
-https://github.com/Luismi0202/BarrioVivo/tree/main/Capturas/CAPTURAS_APP
+1. Instalar la APK (siguiendo el manual).
+2. Crear cuenta.
+3. Crear una publicación con foto y fecha de caducidad.
+4. Entrar con otro usuario y reclamarla.
+5. Abrir el chat y mandar un audio.
+6. Entrar como admin y borrar una publicación que no cumpla.
 
 ---
 
@@ -659,14 +662,30 @@ https://github.com/Luismi0202/BarrioVivo/tree/main/Capturas/CAPTURAS_APP
 
 ### RA8.c - Pruebas de regresión
 
+En mi proyecto he metido pruebas de regresión para asegurarme de que cuando toco algo en el código, lo que ya funcionaba no se rompe. Básicamente, cada vez que hago cambios en el repositorio de publicaciones o en el de chat, paso estos tests para ver que todo sigue igual de bien. Así, si meto una nueva funcionalidad o refactorizo algo, me aseguro de que no la lío con lo que ya estaba hecho.
+
+- [MealPostRepositoryRegressionTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/regression/MealPostRepositoryRegressionTest.kt): Aquí tengo las pruebas de regresión para las publicaciones de comida. Compruebo que se pueden crear, consultar, reclamar y reportar publicaciones, y que los filtros por ubicación y fecha siguen funcionando. Es el típico test que paso antes de mergear a main o cuando toco algo de la lógica de publicaciones.
+
+- [ChatRepositoryRegressionTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/regression/ChatRepositoryRegressionTest.kt): Este es para el chat. Me aseguro de que se pueden crear conversaciones, enviar mensajes de texto, imágenes y audios, marcar mensajes como leídos y cerrar conversaciones. Lo paso siempre que toco algo del chat para que no se me escape ningún bug tonto.
 
 ### RA8.d - Pruebas de volumen/estrés
 
+Aquí me he venido arriba y he hecho pruebas de volumen y estrés para ver cómo aguanta la app cuando hay mucha caña. Simulo un montón de usuarios usando el chat y publicando a la vez, para ver si el sistema peta o sigue yendo fino. Mido tiempos de respuesta, uso de memoria y tasa de errores bajo carga.
+
+- [ChatVolumeStressTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/stress/ChatVolumeStressTest.kt): Simulo muchos usuarios mandando mensajes a la vez en el chat, para ver si el sistema aguanta sin caerse y sin que los mensajes tarden la vida en llegar. Miro el throughput, el tiempo de respuesta y que no haya errores de memoria.
+
+- [MealPostVolumeStressTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/stress/MealPostVolumeStressTest.kt): Aquí hago lo mismo pero con las publicaciones de comida. Cargo el sistema con un montón de publicaciones y consultas simultáneas, para ver si el feed sigue funcionando rápido aunque haya miles de comidas publicadas.
 
 ### RA8.e - Pruebas de seguridad
 
+No me he olvidado de la seguridad, que luego vienen los sustos. Tengo tests para asegurarme de que las contraseñas se guardan bien, que no hay inyecciones raras y que los datos de los usuarios están protegidos. Sigo buenas prácticas de Android y me baso en la guía de OWASP para móviles.
+
+- [SecurityTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/security/SecurityTest.kt): Aquí reviso todo lo de autenticación, autorización, validación de entradas y protección de datos. Compruebo que no se pueden colar SQL injections, que los emails y contraseñas cumplen los requisitos y que los datos sensibles están bien gestionados.
 
 ### RA8.f - Uso de recursos
 
+También he hecho pruebas para ver que la app no se come la batería ni la memoria del móvil. Analizo el uso de CPU, memoria y almacenamiento, y me aseguro de que todo va fluido incluso en móviles de gama media. Si algo se dispara, lo optimizo antes de sacar la versión final.
+
+- [ResourceUsageTest.kt](https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/test/java/com/example/barriovivo/resources/ResourceUsageTest.kt): Este test mide el consumo de recursos de la app, tanto en operaciones normales como bajo carga. Así me aseguro de que no hay fugas de memoria, que el uso de CPU es razonable y que la app no ocupa más espacio del necesario.
 
 ---
