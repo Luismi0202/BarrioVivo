@@ -31,10 +31,53 @@ https://github.com/Luismi0202/BarrioVivo/blob/91a25f5e58ea925604030531db8f9e83d1
 
 ### RA1.b - Creación de interfaz gráfica
 
+Teniendo ya la idea de mi app (lo que he realizado ha sido una app donde la gente pueda subir las comidas que le sobren y hayan unos administradores que controlen lo que se publica con una norma clara: hay que subir la fecha de caducidad del producto), lo que hice fue hacer un esquema de como quería distribuir las pantallas y luego me puse manos a la obra.
 
+ESQUEMA QUE REALICÉ EN PAINT:
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/ESQUEMA_APP_IDEA.png)
+
+El esquema representa lo que tenía en mi cabeza, dos usuarios distintos, uno normal y otro administrador, ambos entrarán en la pantalla principal que es la del login, una vez aquí se verificará si es usuario administrador o no (los usuarios administradores están declarados con correo y contraseña en el json como ya dije, los normales simplemente tienen que registrarse y se pondran en la base de datos de hilt/Rom en persistencia local). Si es administrador, su pantalla principal será el panel de control de admin, donde podrá ver todas las publicaciones y borrarlas si les parece inapropiadas (no siguen las reglas de poner la fecha de caducidad o simplemente no tiene nada que ver con comida). Si es usuario normal, podrá publicar comidas que le sobren, con descripciones foto etc. En las comidas cercanas, les saldrá solo las comidas que hay en su zona (que las ponen ellos a la hora de registrarse), cuando reclamas una comida podrás hablar con la otra persona para ver donde quedar para recogerla y poder acordar otras cosas. Se puede mandar audios, fotos etc, vamos un chat completo que siga muchas pautas de la rúbrica que estaba puesta. 
+
+Las pantallas terminadas son las siguientes (todas las capturas están en la carpeta de CAPTURAS):
+
+PANTALLA PRINCIPAL
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/CREAR_CUENTA.jpeg)
+
+PANTALLA INICIO SESIÓN
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/INICIAR_SESION.jpeg)
+
+PANTALLA REGISTRO
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/CREAR_CUENTA.jpeg)
+
+PANTALLA OLVIDÉ CONTRASEÑA
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_OLVIDE_CONTRASENIA.jpeg)
+
+PANTALLA PANEL DE ADMIN
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_ADMIN.jpeg)
+
+PANTALLA PRINCIPAL USUARIO
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_USUARIO.jpeg)
 
 ### RA1.c - Uso de layouts y posicionamiento
 
+El uso de layouts está presnete sobre todo en la sección ui/screen, ya que he usado la arquitectura MVVM, es decir, la parte lógica (Modelo) está aislada de la visual (Vista) pero se juntan en la carpeta de Vista-Modelo. Las screen simplemente son las diferentes pantalla de la aplicación y al final eso no tiene nada de lógica, si no que es meramente visual. Voy a poner como ejemplo de fragmento de código una de estas pantallas porque poner todas sería desarrollar muchísimo y al final todas siguen una estructura similar y se pueden ver dentro del propio código.
+
+FRAGMENTO DE CÓDIGO DE PANTALLA VISTA USUARIO NORMAL
+
+![](https://github.com/Luismi0202/BarrioVivo/blob/388e713ba4113b5e748bb623cd0ac8370129e0d7/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt#L1-L453)
+
+Voy a desglosar esto un poco para que se pueda entender que herramientas de posicionamiento he utilizado y como he organizado la interfaz.
+
+https://github.com/Luismi0202/BarrioVivo/blob/388e713ba4113b5e748bb623cd0ac8370129e0d7/app/src/main/java/com/example/barriovivo/ui/screen/HomeScreen.kt#L80-L113
+
+Lo primero es un Scaffold que es el cuerpo principal de la aplicación, en el defino la parte de arriba (topappbar) y los colores que tendrá y las acciones que se hará cuando se pulse uno de los botones que están en la topappbar (están las publicaciones globales y ver solo las tuyas)
 
 ### RA1.d - Personalización de componentes
 
