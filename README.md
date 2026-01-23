@@ -65,6 +65,9 @@ PANTALLA PRINCIPAL USUARIO
 
 ![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_USUARIO.jpeg)
 
+PANTALLA INFORMES (SOLO PARA ADMIN, AÑADIDA A POSTERIORI DEBIDO A QUE LO PEDÍA UN RA Y NO LO TENÍA IMPLEMENTADO)
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_INFORME.jpeg)
+
 ### RA1.c - Uso de layouts y posicionamiento
 
 El uso de layouts está presente sobre todo en la sección ui/screen, ya que he usado la arquitectura MVVM, es decir, la parte lógica (Modelo) está aislada de la visual (Vista) pero se juntan en la carpeta de Vista-Modelo. Las screen simplemente son las diferentes pantallas de la aplicación y al final eso no tiene nada de lógica, sino que es meramente visual. Voy a poner como ejemplo de fragmento de código una de estas pantallas porque poner todas sería desarrollar muchísimo y al final todas siguen una estructura similar y se pueden ver dentro del propio código.
@@ -467,18 +470,17 @@ He probado la app en emulador y también en un dispositivo Android para verifica
 
 ## RA5 - Informes y Datos
 
-En mi caso, la parte de datos está centrada en la base de datos local y en cómo se representan y consultan los datos de la app. Para el tema de informes, ahora mismo no hay un “informe” como documento final, pero sí hay consultas y pantallas que muestran datos agregados (por ejemplo listados de publicaciones, notificaciones y chat).
+Cambié todo el código que tenía anteriormente para hacer otro release donde estuvieran integrados estos informes (lo hice así porque no me di cuenta de que existía este RA y lo he implementado a finales). Al final lo único que he tenido que hacer es añadir contadores y cada vez que se hace una acción, se añade un evento que suma esa acción.
 
-### RA5.a - Estructura del informe
+CÓDIGO DE LA PANTALLA INFORMES:
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt
 
-Si tuviera que definir un informe dentro de mi app (por ejemplo para admin), la estructura lógica sería:
+Esta pantalla solo la podrán ver los administradores ya que no tiene lógica que los usuarios puedan ver tantos datos, en mi cabeza tiene más sentido que sea el administrador el que quiera generar un informe de los datos de la aplicaión.
 
+### RA5.a - Estructura del informe  
 - Listado de publicaciones por estado (activas, reclamadas, expiradas)
 - Datos de moderación (cuántas borradas, por qué motivo)
 - Actividad de usuarios (publicaciones por zona)
-
-Esto encaja con cómo ya tengo estructurados los datos en Room.
-
 ENTIDADES
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/database/entity/Entities.kt#L1-L196
 
@@ -498,7 +500,12 @@ https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example
 
 ### RA5.d - Valores calculados, recuentos o totales
 
-A día de hoy no tengo un módulo dedicado a cálculos tipo estadísticas, pero se podrían añadir recuentos fácilmente con consultas Room (por ejemplo contar publicaciones por zona o cuántas están caducadas). La estructura ya está preparada porque tengo DAOs y repositorios separados.
+TENGO CALCULADO CUANTOS POSTS HAY, CUANTOS HAN SIDO ELIMINADOS POR EL ADMIN ETC...
+
+Se puede ver en el código relacionado con la pantalla de informe que he enlazado anteriormente además de en el vídeo explicativo que mandaré junto a este proyecto.
+
+CAPTURA DE LA PANTALLA:
+![](https://github.com/Luismi0202/BarrioVivo/blob/main/Capturas/CAPTURAS_APP/PANTALLA_INFORME.jpeg)
 
 ### RA5.e - Gráficos generados a partir de los datos
 
