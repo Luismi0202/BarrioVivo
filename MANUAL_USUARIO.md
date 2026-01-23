@@ -1,4 +1,4 @@
-# Manual de usuario - BarrioVivo
+# Manual de Usuario - BarrioVivo
 
 Este manual es para explicar, paso a paso, cómo se usa la app BarrioVivo como usuario normal y como administrador. La idea de la aplicación es sencilla: en vez de tirar comida que te sobra, la publicas con fotos y fecha de caducidad y otra persona cercana la puede reclamar. Cuando alguien reclama una comida, se abre un chat para quedar y organizar la recogida.
 

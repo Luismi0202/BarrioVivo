@@ -283,7 +283,15 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onProfileClick = { navController.navigate("admin_profile") },
-                                onNotificationsClick = { navController.navigate("admin_notifications") }
+                                onNotificationsClick = { navController.navigate("admin_notifications") },
+                                onReportsClick = { navController.navigate("admin_reports") }
+                            )
+                        }
+
+                        // Admin Reports Screen
+                        composable("admin_reports") {
+                            ReportScreen(
+                                onBack = { navController.popBackStack() }
                             )
                         }
 

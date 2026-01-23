@@ -36,7 +36,8 @@ fun AdminDashboardScreen(
     viewModel: AdminViewModel = hiltViewModel(),
     onLogout: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    onReportsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -76,6 +77,14 @@ fun AdminDashboardScreen(
                     containerColor = GreenDark
                 ),
                 actions = {
+                    // Informes
+                    IconButton(onClick = onReportsClick) {
+                        Icon(
+                            Icons.Default.Assessment,
+                            contentDescription = "Informes",
+                            tint = Color.White
+                        )
+                    }
                     // Notificaciones (reportes)
                     BadgedBox(
                         badge = {
@@ -552,6 +561,7 @@ fun AdminDashboardScreen(
     successMessage: String? = null,
     onBack: () -> Unit = {},
     onProfileClick: () -> Unit = {},
+    onReportsClick: () -> Unit = {},
     onApprove: (postId: String) -> Unit = {},
     onReject: (postId: String, reason: String) -> Unit = { _, _ -> },
     onErrorDismiss: () -> Unit = {},
@@ -561,7 +571,8 @@ fun AdminDashboardScreen(
     AdminDashboardScreen(
         onLogout = onBack,
         onProfileClick = onProfileClick,
-        onNotificationsClick = {}
+        onNotificationsClick = {},
+        onReportsClick = onReportsClick
     )
 }
 

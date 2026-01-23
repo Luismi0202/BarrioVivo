@@ -9,9 +9,9 @@
 
 ### RA1.a - Análisis de herramientas y librerías
 
-Para la realización de mi idea, obviamente he tenido que usar una serie de herramientas para poder llevarla acabo. Lo más importante es que claramente se necesita un entorno de dearrollo para poder realizar un aplicacion móvil, en mi caso he utlizado Android Studio y como lenguaje de programación he usado Kotlin, ambas son las cosas que he aprendido a lo largo de este ciclo formativo para poder llevar a cabo una aplicación, así que no se sale para nada de lo aprendido.
+Para la realización de mi idea, obviamente he tenido que usar una serie de herramientas para poder llevarla a cabo. Lo más importante es que claramente se necesita un entorno de desarrollo para poder realizar una aplicación móvil, en mi caso he utilizado Android Studio y como lenguaje de programación he usado Kotlin, ambas son las cosas que he aprendido a lo largo de este ciclo formativo para poder llevar a cabo una aplicación, así que no se sale para nada de lo aprendido.
 
-Las librerías son códigos que ya están hechos que tu los importas en tu propio código para poder usarlo. En mi caso he utlizado libreris como icons para los iconos, hilt y rom para la persistencia local logrando hacer una base de datos en el propio móvil localmente y haciendo así un login y que los datos no se pierdan cuando se cierra la aplicación, también he usado android serialization para la serialización de objetos (es decir, transformar una cadena de texto en un objeto o viceversa), esto último sobre todo ha sido porque tengo un json dentro del propio código que es donde se encuentran los administradores y se encuentran serializados y el propio código los deserializa para transformarlos en usuarios administradores, haciendo que si loggeas con uno de los usuarios que están puestos en el json, abra como administrador. También he utilizado otras herramientas como pueden ser herramientas que te permiten usar la cámara del móvil o el micrófono para usarlos dentro de mi app. Esta clase de cosas no serían posible si no se dieran los permisos en el AndroidManifest
+Las librerías son códigos que ya están hechos que tú los importas en tu propio código para poder usarlo. En mi caso he utilizado librerías como icons para los iconos, hilt y room para la persistencia local logrando hacer una base de datos en el propio móvil localmente y haciendo así un login y que los datos no se pierdan cuando se cierra la aplicación, también he usado android serialization para la serialización de objetos (es decir, transformar una cadena de texto en un objeto o viceversa), esto último sobre todo ha sido porque tengo un json dentro del propio código que es donde se encuentran los administradores y se encuentran serializados y el propio código los deserializa para transformarlos en usuarios administradores, haciendo que si loggeas con uno de los usuarios que están puestos en el json, abra como administrador. También he utilizado otras herramientas como pueden ser herramientas que te permiten usar la cámara del móvil o el micrófono para usarlos dentro de mi app. Esta clase de cosas no serían posible si no se dieran los permisos en el AndroidManifest
 
 FRAGMENTOS DE CÓDIGO:
 
@@ -67,7 +67,7 @@ PANTALLA PRINCIPAL USUARIO
 
 ### RA1.c - Uso de layouts y posicionamiento
 
-El uso de layouts está presnete sobre todo en la sección ui/screen, ya que he usado la arquitectura MVVM, es decir, la parte lógica (Modelo) está aislada de la visual (Vista) pero se juntan en la carpeta de Vista-Modelo. Las screen simplemente son las diferentes pantalla de la aplicación y al final eso no tiene nada de lógica, si no que es meramente visual. Voy a poner como ejemplo de fragmento de código una de estas pantallas porque poner todas sería desarrollar muchísimo y al final todas siguen una estructura similar y se pueden ver dentro del propio código.
+El uso de layouts está presente sobre todo en la sección ui/screen, ya que he usado la arquitectura MVVM, es decir, la parte lógica (Modelo) está aislada de la visual (Vista) pero se juntan en la carpeta de Vista-Modelo. Las screen simplemente son las diferentes pantallas de la aplicación y al final eso no tiene nada de lógica, sino que es meramente visual. Voy a poner como ejemplo de fragmento de código una de estas pantallas porque poner todas sería desarrollar muchísimo y al final todas siguen una estructura similar y se pueden ver dentro del propio código.
 
 FRAGMENTO DE CÓDIGO DE PANTALLA VISTA USUARIO NORMAL
 
@@ -114,7 +114,7 @@ https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example
 
 ### RA1.d - Personalización de componentes
 
-En mi caso no me he limitado a usar los componentes por defecto sin más, si no que he creado componentes reutilizables para mantener un estilo consistente en toda la aplicación. Esto se puede ver sobre todo en el archivo de componentes, donde tengo botones, cards, top bars, inputs y pequeños elementos visuales que se repiten en varias pantallas.
+En mi caso no me he limitado a usar los componentes por defecto sin más, sino que he creado componentes reutilizables para mantener un estilo consistente en toda la aplicación. Esto se puede ver sobre todo en el archivo de componentes, donde tengo botones, cards, top bars, inputs y pequeños elementos visuales que se repiten en varias pantallas.
 
 ARCHIVO PRINCIPAL DE COMPONENTES
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/component/Components.kt#L1-L432
@@ -186,7 +186,7 @@ Durante el desarrollo he ido modificando el código para ir metiendo funcionalid
 - Añadir un sistema de admin separado del usuario normal (comprobación contra el json de admins).
 - Mejorar el chat para que no sea solo texto y tenga adjuntos como audios o imágenes.
 
-Al final, no es solo “hacer pantallas”, si no que todo está conectado con el flujo de datos que he comentado antes.
+Al final, no es solo "hacer pantallas", sino que todo está conectado con el flujo de datos que he comentado antes.
 
 ARCHIVO DE APP PARA INICIALIZACIÓN Y RUTAS
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/BarrioVivoApp.kt#L1-L99
@@ -228,7 +228,7 @@ La app está integrada porque todas las partes principales están conectadas ent
 - Chat entre usuarios cuando alguien reclama una comida
 - Panel de admin para moderar
 
-No son pantallas aisladas, si no que todo usa el mismo modelo de datos, la misma base de datos y la misma navegación. La navegación y el arranque de toda la app se gestiona desde la activity principal.
+No son pantallas aisladas, sino que todo usa el mismo modelo de datos, la misma base de datos y la misma navegación. La navegación y el arranque de toda la app se gestiona desde la activity principal.
 
 MAIN ACTIVITY
 https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt#L1-L336
@@ -244,7 +244,7 @@ Aunque mi app es principalmente una app clásica de móvil (pantallas táctiles)
 - Micrófono: para mandar audios en el chat.
 - Cámara: para adjuntar imágenes (por ejemplo en publicaciones o en chat).
 
-A nivel de Android, esto implica trabajar con permisos y con APIs de sistema. No es algo “magia”, si no que hay que pedir el permiso y gestionar el resultado.
+A nivel de Android, esto implica trabajar con permisos y con APIs de sistema. No es algo "magia", sino que hay que pedir el permiso y gestionar el resultado.
 
 El eje principal de estas interacciones lo tengo dentro de la parte de chat, que es donde más sentido tiene mandar audio o imagen.
 
@@ -619,20 +619,61 @@ Un tutorial rápido de uso (si lo tuviese que grabar o explicarlo en clase) ser�
 
 ## RA5 - Informes (FFOE)
 
+He implementado un sistema completo de generación de informes y estadísticas para la aplicación. Los administradores pueden acceder a una pantalla dedicada desde el panel de admin donde pueden ver métricas en tiempo real y exportar informes en diferentes formatos.
+
 ### RA5.f - Uso de herramientas para generar informes
 
+Para la generación de informes he usado las propias herramientas de Kotlin y Android sin necesidad de librerías externas, porque al final lo que necesito es:
+
+1. **Recopilar datos de Room**: Usando los DAOs que ya tenía, hago consultas para obtener estadísticas (número de publicaciones, reportes, conversaciones, etc.).
+2. **Procesar y agregar datos**: En el repositorio de informes calculo totales, agrupo por ciudad, por día, y saco los usuarios más activos.
+3. **Generar archivos de salida**: Exporto a CSV para que se pueda abrir en Excel o similar, y a texto plano con formato bonito para ver directamente.
+
+La herramienta principal es el propio lenguaje Kotlin con su manejo de colecciones (map, filter, groupBy, etc.) que hace que procesar los datos sea bastante limpio. Para los archivos uso `FileWriter` de Java que va perfecto para esto.
+
+REPOSITORIO DE INFORMES (aquí está toda la lógica de generación):
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/data/repository/ReportRepository.kt
 
 ### RA5.g - Modificación del código del informe
 
+El informe se puede modificar de varias formas:
+
+1. **Filtros**: El método `generatePostsReportCSV` acepta parámetros para filtrar por estado o ciudad, así que puedo generar informes específicos.
+2. **Estructura del informe resumido**: En `generateSummaryReport` tengo un `buildString` donde voy montando el informe con formato de texto. Si quiero añadir más secciones, solo tengo que añadir más `appendLine`.
+3. **Datos calculados**: Puedo añadir nuevas métricas fácilmente, por ejemplo podría añadir "promedio de publicaciones por usuario" o "días desde la última publicación".
+
+El código está pensado para que sea fácil de extender. Por ejemplo, si mañana quiero añadir un gráfico de barras en la pantalla, solo tengo que añadir los datos calculados en `AppStatistics` y pintarlos en la UI.
+
+PANTALLA DE INFORMES (donde se muestra todo visualmente):
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/ReportScreen.kt
+
+VIEWMODEL DE INFORMES (conecta la UI con los datos):
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/viewmodel/ReportViewModel.kt
 
 ### RA5.h - App con informes integrados
+
+Los informes están totalmente integrados en la aplicación y se accede a ellos desde el panel de administrador. Lo que puede hacer un admin:
+
+1. **Ver estadísticas en tiempo real**: Nada más entrar a la pantalla de informes ve un resumen con el total de publicaciones, activas, reportadas, reclamadas, etc.
+2. **Ver desglose por categorías**: Publicaciones por ciudad, usuarios más activos, actividad de los últimos 7 días.
+3. **Exportar a CSV**: Un botón que genera un archivo CSV con todas las publicaciones, que luego puede abrir en Excel para hacer sus propios análisis.
+4. **Exportar a texto**: Un botón que genera un informe resumido en formato de texto plano, muy útil para enviar por email o guardarlo como registro.
+5. **Ver informe completo**: Un diálogo que muestra el informe formateado directamente en la app sin necesidad de exportar.
+
+La integración se ve muy clara en la navegación: desde el `AdminDashboardScreen` hay un botón con el icono de gráficos que lleva a la pantalla de informes.
+
+ADMIN DASHBOARD (con el botón de acceso a informes):
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/ui/screen/AdminDashboardScreen.kt
+
+NAVEGACIÓN EN MAINACTIVITY (ruta admin_reports):
+https://github.com/Luismi0202/BarrioVivo/blob/main/app/src/main/java/com/example/barriovivo/MainActivity.kt
 
 
 ---
 
 ## RA7 - Distribución de aplicaciones (FFOE)
 
-DENTRO DEL MANUAL DE INSTALACIÓN YA SE HABLA DE QUE EN EL RELEASE ESTÁ EL EMPAQUETADO DE MI APLIACIÓN ASI QUE OMITO HABLAR PUNTO A PUNTO DE ESTE RA, YA QUE SENCILLAMENTE EN EL IDE HICE UN APK, LO SUBI A RELEASES Y LUEGO EXPLIQUÉ COMO INSTALARLO. PARA DESINSTALARLO SIMPLEMENTE HAY QUE DESINSTALARLO COMO UNA APP CUALQUIERA
+DENTRO DEL MANUAL DE INSTALACIÓN YA SE HABLA DE QUE EN EL RELEASE ESTÁ EL EMPAQUETADO DE MI APLICACIÓN, ASÍ QUE OMITO HABLAR PUNTO A PUNTO DE ESTE RA, YA QUE SENCILLAMENTE EN EL IDE HICE UN APK, LO SUBÍ A RELEASES Y LUEGO EXPLIQUÉ CÓMO INSTALARLO. PARA DESINSTALARLO SIMPLEMENTE HAY QUE DESINSTALARLO COMO UNA APP CUALQUIERA.
 
 
 ---

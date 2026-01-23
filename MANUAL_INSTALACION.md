@@ -1,4 +1,4 @@
-# Manual de instalación - BarrioVivo (APK)
+# Manual de Instalación - BarrioVivo (APK)
 
 Este manual explica cómo instalar BarrioVivo en un móvil Android usando el release del proyecto. En GitHub hay un release con una carpeta comprimida que dentro lleva el APK.
 
